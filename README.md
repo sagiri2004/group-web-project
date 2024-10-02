@@ -33,3 +33,5 @@ npm start
 cd ../classroom-project-frontend
 yarn dev
 ```
+
+- Lưu ý: Bạn cần chắc chắn đã cài đặt `yarn` để chạy frontend với lệnh `yarn dev`.
