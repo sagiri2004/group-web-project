@@ -1,13 +1,9 @@
-// theme.js
 import { experimental_extendTheme as extendTheme } from "@mui/material/styles";
 
-// Tạo theme với các tùy chỉnh cho light và dark mode
 const theme = extendTheme({
-
   components: {
     MuiCssBaseline: {
       styleOverrides: {
-        // Tùy chỉnh cho light mode
         '*[data-mui-color-scheme="light"]': {
           "&::-webkit-scrollbar": {
             width: "8px",
@@ -22,7 +18,6 @@ const theme = extendTheme({
             backgroundColor: "white",
           },
         },
-        // Tùy chỉnh cho dark mode
         '*[data-mui-color-scheme="dark"]': {
           "&::-webkit-scrollbar": {
             width: "8px",
