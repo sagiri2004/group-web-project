@@ -36,7 +36,7 @@ function AuthenticationPage() {
           sx={{
             textTransform: "none",
           }}
-          onClick={() => window.history.pushState({}, "", "/")}
+          onClick={() => window.history.back()}
         >
           Back to Home
         </Button>
