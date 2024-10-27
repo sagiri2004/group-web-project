@@ -1,6 +1,17 @@
 import { experimental_extendTheme as extendTheme } from "@mui/material/styles";
 
+const HEADER_HEIGHT = "56px";
+const DRAWER_WIDTH_MAX = "240px";
+const DRAWER_WIDTH_MIN = "64px";
+const MAIN_CONTENT_HEIGHT = `calc(100vh - ${HEADER_HEIGHT})`;
+
 const theme = extendTheme({
+  custom: {
+    headerHeight: HEADER_HEIGHT,
+    mainContentHeight: MAIN_CONTENT_HEIGHT,
+    drawerWidthMax: DRAWER_WIDTH_MAX,
+    drawerWidthMin: DRAWER_WIDTH_MIN,
+  },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
