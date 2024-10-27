@@ -14,22 +14,32 @@ function Default({ children }) {
         overflow: "hidden",
       }}
     >
-      <Sidebar />
       <Header />
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           flexGrow: 1,
           width: "100%",
+          height: (theme) => theme.custom.mainContentHeight,
+          mt: (theme) => theme.custom.headerHeight,
         }}
       >
+        <Sidebar />
         <Box
           sx={{
-            paddingTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            flexGrow: 1,
           }}
         >
-          {children}
+          <Box
+            sx={{
+              paddingTop: 8,
+            }}
+          >
+            {children}
+          </Box>
         </Box>
       </Box>
     </Box>
