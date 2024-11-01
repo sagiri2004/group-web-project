@@ -33,13 +33,7 @@ function Default({ children }) {
             flexGrow: 1,
           }}
         >
-          <Box
-            sx={{
-              paddingTop: 8,
-            }}
-          >
-            {children}
-          </Box>
+          <Box>{children}</Box>
         </Box>
       </Box>
     </Box>
