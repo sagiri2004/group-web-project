@@ -2,46 +2,38 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
+  class Classroom extends Model {
     static associate(models) {
       // Define associations here
-      User.belongsToMany(models.Classroom, {
+      Classroom.belongsToMany(models.User, {
         through: "Users_Classrooms",
-        foreignKey: "userId",
-        otherKey: "classroomId",
+        foreignKey: "classroomId",
+        otherKey: "userId",
       });
     }
   }
-  User.init(
+  Classroom.init(
     {
-      username: {
+      name: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
       },
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      avatar: {
+      description: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      password: {
+      imageUrl: {
         type: DataTypes.STRING,
-        allowNull: false,
-      },
-      roleId: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
+        allowNull: true,
       },
     },
     {
       sequelize,
-      modelName: "User",
-      tableName: "Users",
+      modelName: "Classroom",
+      tableName: "Classrooms",
       timestamps: true,
     }
   );
-  return User;
+  return Classroom;
 };

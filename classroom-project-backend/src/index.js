@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const connectDB = require("./config/connectDB"); // Kết nối đến CSDL
+const connectDB = require("./config/connectDB");
 const authRoutes = require("./routes/auth.js");
 
 const app = express();
