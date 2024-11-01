@@ -1,6 +1,12 @@
 import config from "~/config";
 
-import { Authentication, HomePage, Settings } from "~/pages";
+import {
+  Authentication,
+  HomePage,
+  Settings,
+  Classrooms,
+  Classroom,
+} from "~/pages";
 import Default from "~/layouts/Default";
 
 const publicRoutes = [
@@ -12,6 +18,8 @@ const publicRoutes = [
   { path: config.routes.login, component: Authentication, layout: null },
   { path: config.routes.signup, component: Authentication, layout: null },
   { path: config.routes.settings, component: Settings, layout: Default },
+  { path: config.routes.classrooms, component: Classrooms, layout: Default },
+  { path: config.routes.classroom, component: Classroom, layout: Default },
 ];
 
 const privateRoutes = [];
