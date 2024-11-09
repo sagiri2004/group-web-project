@@ -1,27 +1,32 @@
 'use strict';
-/** @type {import('sequelize-cli').Migration} */
+
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('User_Histories', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      username: {
-        type: Sequelize.STRING
-      },
-      email: {
-        type: Sequelize.STRING
-      },
-      password: {
-        type: Sequelize.STRING
-      },
-      roleId: {
-        // nếu không có role 0 là admin, 1 là user
+      userId: {
         type: Sequelize.INTEGER,
-        defaultValue: 1
+        references: {
+          model: 'Users',
+          key: 'id'
+        },
+        onDelete: 'CASCADE'
+      },
+      flashcardSetId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Flashcard_Sets',
+          key: 'id'
+        },
+        onDelete: 'CASCADE'
+      },
+      activityType: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -33,7 +38,8 @@ module.exports = {
       }
     });
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Users');
+    await queryInterface.dropTable('User_Histories');
   }
 };
