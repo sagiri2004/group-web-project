@@ -1,8 +1,10 @@
 import { Box } from "@mui/material";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import Footer from "./Footer";
 import Content from "./Content";
+
+import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const fakeClassroomAPI = {
   id: "1",
@@ -12,6 +14,17 @@ const fakeClassroomAPI = {
 };
 
 function ClassroomPage() {
+  const location = useLocation();
+  const [currentPath, setCurrentPath] = useState("home");
+
+  useEffect(() => {
+    if (location.pathname.includes("assignments")) {
+      setCurrentPath("assignments");
+    } else {
+      setCurrentPath("home");
+    }
+  }, [location]);
+
   return (
     <Box
       sx={{
@@ -27,9 +40,8 @@ function ClassroomPage() {
           flexGrow: 1,
         }}
       >
-        <Header />
-        <Content />
-        <Footer />
+        <Header page={currentPath} />
+        <Content page={currentPath} />
       </Box>
     </Box>
   );

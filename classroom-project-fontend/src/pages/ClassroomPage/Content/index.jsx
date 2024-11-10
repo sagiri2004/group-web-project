@@ -1,16 +1,12 @@
-import { Box } from "@mui/material";
+import HomePage from "./HomePage";
+import AssignmentsPage from "./AssignmentsPage";
 
-function Content() {
+function Content({ page }) {
   return (
-    <Box
-      sx={{
-        height: (theme) =>
-          `calc(${theme.custom.mainContentHeight} - ${theme.custom.headerHeight})`,
-        mt: (theme) => theme.custom.headerHeight,
-      }}
-    >
-      Content
-    </Box>
+    <>
+      {page === "home" && <HomePage />}
+      {page === "assignments" && <AssignmentsPage />}
+    </>
   );
 }
 
