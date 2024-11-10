@@ -1,6 +1,36 @@
-import { Box } from "@mui/material";
+import { Box, Tabs, Tab } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-function Header() {
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+}
+
+const headerPages = {
+  home: 0,
+  assignments: 1,
+};
+
+function Header({ page }) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    setValue(headerPages[page]);
+  }, [page]);
+
+  const navigate = useNavigate();
+  const { classroomId } = useParams();
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+    if (newValue === 0) {
+      navigate(`/classroom/${classroomId}`);
+    } else {
+      navigate(`/classroom/${classroomId}/assignments`);
+    }
+  };
   return (
     <Box
       sx={{
@@ -20,7 +50,16 @@ function Header() {
         borderColor: "primary.dark",
       }}
     >
-      Header
+      <Box sx={{ width: "100%", height: "100%" }}>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          aria-label="basic tabs example"
+        >
+          <Tab label="Home" {...a11yProps(0)} />
+          <Tab label="Assignment" {...a11yProps(1)} />
+        </Tabs>
+      </Box>
     </Box>
   );
 }

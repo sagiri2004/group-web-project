@@ -20,6 +20,12 @@ const publicRoutes = [
   { path: config.routes.settings, component: Settings, layout: Default },
   { path: config.routes.classrooms, component: Classrooms, layout: Default },
   { path: config.routes.classroom, component: Classroom, layout: Default },
+  { path: config.routes.assignments, component: Classroom, layout: Default },
+  {
+    path: config.routes.assignmentDetail,
+    component: Classroom,
+    layout: Default,
+  },
 ];
 
 const privateRoutes = [];

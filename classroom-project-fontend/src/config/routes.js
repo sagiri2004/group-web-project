@@ -4,7 +4,9 @@ const routes = {
   signup: "/signup",
   settings: "/settings",
   classrooms: "/classrooms",
-  classroom: "/classroom/:id",
+  classroom: "/classroom/:classroomId",
+  assignments: "/classroom/:classroomId/assignments",
+  assignmentDetail: "/classroom/:classroomId/assignment/:assignmentId",
 };
 
 export default routes;

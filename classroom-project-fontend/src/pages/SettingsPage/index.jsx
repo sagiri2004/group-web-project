@@ -19,7 +19,6 @@ import { useEffect, useState } from "react";
 
 import SettingPageSkeleton from "./Skeleton";
 
-import SelectTheme from "~/components/selectTheme";
 import { useDispatch } from "react-redux";
 import { updateUser, fetchUser } from "~/redux/userSlice";
 
