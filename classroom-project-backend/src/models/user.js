@@ -4,7 +4,16 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // association 
+      User.hasOne(models.Profile, { foreignKey: "userId", as: "profile" });
+      User.belongsToMany(models.FlashcardSet, {
+        through: models.FlashcardSetUser, // Phải khớp với tên bảng trung gian
+        foreignKey: "userId",
+        otherKey: "flashcardSetId",
+        as: "flashcardSets",
+      });
+      User.hasMany(models.Folder, { foreignKey: "userId", as: "folders" })
+      // history
+      User.hasMany(models.UserHistory, { foreignKey: "userId", as: "userHistories" });
     }
   }
   User.init({
