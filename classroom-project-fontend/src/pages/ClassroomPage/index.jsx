@@ -18,7 +18,10 @@ function ClassroomPage() {
   const [currentPath, setCurrentPath] = useState("home");
 
   useEffect(() => {
-    if (location.pathname.includes("assignments")) {
+    if (
+      location.pathname.includes("assignments") ||
+      location.pathname.includes("assignment")
+    ) {
       setCurrentPath("assignments");
     } else {
       setCurrentPath("home");
