@@ -8,6 +8,7 @@ const AssignmentCard = ({
   className,
   creationTime,
   dueTime,
+  dueStatus,
   onClick,
 }) => {
   return (
@@ -19,6 +20,7 @@ const AssignmentCard = ({
         padding: 2,
         cursor: "pointer",
         width: "90%",
+        my: 1,
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
@@ -41,7 +43,14 @@ const AssignmentCard = ({
           Created: {creationTime}
         </Typography>
         <Typography variant="body2" color="error">
-          Due: {dueTime}
+          Due: {dueTime.toLocaleString()}
+        </Typography>
+        <Typography
+          variant="body2"
+          color="textSecondary"
+          sx={{ fontWeight: "bold" }}
+        >
+          {dueStatus}
         </Typography>
       </Box>
     </Card>

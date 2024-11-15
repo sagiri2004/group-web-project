@@ -1,5 +1,13 @@
 import React, { useRef, useState } from "react";
-import { Box, Typography, Button, Divider, IconButton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Divider,
+  IconButton,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -7,6 +15,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 const AssignmentDetail = ({ data }) => {
   const fileInputRef = useRef(null);
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState("success");
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -22,6 +33,25 @@ const AssignmentDetail = ({ data }) => {
   const handleRemoveFile = () => {
     setUploadedFile(null);
     fileInputRef.current.value = "";
+  };
+
+  const handleTurnIn = () => {
+    if (uploadedFile) {
+      console.log("Turned in:", uploadedFile);
+      setAlertMessage("Turned in successfully!");
+      setAlertSeverity("success");
+    } else {
+      console.log("No file attached");
+      setAlertMessage(
+        "No file attached. Please attach a file before turning in."
+      );
+      setAlertSeverity("error");
+    }
+    setAlertOpen(true);
+  };
+
+  const handleCloseAlert = () => {
+    setAlertOpen(false);
   };
 
   return (
@@ -61,7 +91,9 @@ const AssignmentDetail = ({ data }) => {
         <Typography variant="body2" sx={{ marginRight: "8px" }}>
           {data.status}
         </Typography>
-        <Button variant="contained">Turn in</Button>
+        <Button variant="contained" onClick={handleTurnIn}>
+          Turn in
+        </Button>
       </Box>
 
       {/* Divider */}
@@ -103,6 +135,21 @@ const AssignmentDetail = ({ data }) => {
           </Box>
         )}
       </Box>
+
+      {/* Snackbar for alerts */}
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseAlert}
+      >
+        <Alert
+          onClose={handleCloseAlert}
+          severity={alertSeverity}
+          sx={{ width: "100%" }}
+        >
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
