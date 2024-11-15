@@ -1,8 +1,10 @@
-import { Box } from "@mui/system";
+import React, { useEffect, useState, useRef } from "react";
+import { Box, Button, Typography } from "@mui/material";
 import AssignmentCard from "./AssignmentCard";
 import AssignmentDetail from "./AssignmentDetail";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import AssignmentCreation from "./AssignmentCreation";
+import { useParams, useLocation } from "react-router-dom";
+import { format, isToday, isThisWeek, isPast } from "date-fns";
 
 const demoData = [
   {
@@ -11,24 +13,17 @@ const demoData = [
     title: "Week 1",
     className: "IT3080 - Mạng máy tính",
     creationTime: "6:45 AM",
-    dueTime: "11:59 PM",
+    dueTime: new Date("2024-10-21T23:59:00"),
   },
   {
     id: 2,
     img: "https://example.com/path-to-image2.jpg",
     title: "Week 2",
     className: "IT3080 - Mạng máy tính",
-    creationTime: "7:00 AM",
-    dueTime: "11:59 PM",
+    creationTime: "6:45 AM",
+    dueTime: new Date("2024-10-22T23:59:00"),
   },
-  {
-    id: 3,
-    img: "https://example.com/path-to-image3.jpg",
-    title: "Week 3",
-    className: "IT3080 - Mạng máy tính",
-    creationTime: "7:30 AM",
-    dueTime: "11:59 PM",
-  },
+  // ... more demo data
 ];
 
 const demo = {
@@ -41,10 +36,12 @@ const demo = {
 };
 
 function AssignmentsPage() {
-  const navigate = useNavigate();
   const { classroomId } = useParams();
   const location = useLocation();
   const [currentPath, setCurrentPath] = useState("assignments");
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const dialogRef = useRef(null);
+  const isAdmin = true;
 
   useEffect(() => {
     if (location.pathname.includes("assignments")) {
@@ -55,7 +52,38 @@ function AssignmentsPage() {
   }, [location]);
 
   const handleCardClick = (id) => {
-    navigate(`/classroom/${classroomId}/assignment/${id}`);
+    setCurrentPath("assignment");
+  };
+
+  const handleCreateAssignment = () => {
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const handleCreate = (newAssignment) => {
+    console.log("Created assignment:", newAssignment);
+    setDialogOpen(false);
+  };
+
+  useEffect(() => {
+    if (isDialogOpen && dialogRef.current) {
+      dialogRef.current.focus();
+    }
+  }, [isDialogOpen]);
+
+  const getDueStatus = (dueTime) => {
+    if (isToday(dueTime)) {
+      return "Due today";
+    } else if (isThisWeek(dueTime)) {
+      return "Due this week";
+    } else if (isPast(dueTime)) {
+      return "Overdue";
+    } else {
+      return `Due on ${format(dueTime, "MMMM d, yyyy")}`;
+    }
   };
 
   return (
@@ -69,14 +97,26 @@ function AssignmentsPage() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 2,
         }}
       >
+        {/* Render the Create Assignment button only if isAdmin is true */}
+        {isAdmin && currentPath === "assignments" && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCreateAssignment}
+            sx={{ alignSelf: "flex-end", my: 1 }}
+          >
+            Create Assignment
+          </Button>
+        )}
+
         {currentPath === "assignments" ? (
           demoData.map((assignment) => (
             <AssignmentCard
               key={assignment.id}
               {...assignment}
+              dueStatus={getDueStatus(assignment.dueTime)}
               onClick={() => handleCardClick(assignment.id)}
             />
           ))
@@ -84,6 +124,14 @@ function AssignmentsPage() {
           <AssignmentDetail data={demo} />
         )}
       </Box>
+
+      {/* Assignment Creation Dialog with useRef */}
+      <AssignmentCreation
+        open={isDialogOpen}
+        onClose={handleDialogClose}
+        onCreate={handleCreate}
+        dialogRef={dialogRef}
+      />
     </Box>
   );
 }
