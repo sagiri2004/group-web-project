@@ -12,6 +12,7 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import authReducer from "~/redux/authSlice";
+import flashcardReducer from "~/redux/flashcardSetSlice";
 
 const persistConfig = {
   key: "root",
@@ -22,6 +23,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  flashcardSet: flashcardReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

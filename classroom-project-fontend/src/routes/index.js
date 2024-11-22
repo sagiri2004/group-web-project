@@ -6,6 +6,8 @@ import {
   Settings,
   Classrooms,
   Classroom,
+  FlashCardPage,
+  EditFlashcardPage,
 } from "~/pages";
 import Default from "~/layouts/Default";
 
@@ -26,6 +28,8 @@ const publicRoutes = [
     component: Classroom,
     layout: Default,
   },
+  { path: config.routes.flashCards, component: FlashCardPage, layout: Default },
+  { path: config.routes.edit, component: EditFlashcardPage, layout: Default },
 ];
 
 const privateRoutes = [];
