@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "sagiri",
-    "password": "asdwasdw123",
-    "database": "classroomdb",
-    "host": "127.0.0.1",
+    "username": "admin",
+    "password": "nguyenhuuthang2004",
+    "database": "my_db",
+    "host": "database-2.cjwyu6a8i9zc.ap-southeast-2.rds.amazonaws.com",
     "dialect": "mysql"
   },
   "test": {
