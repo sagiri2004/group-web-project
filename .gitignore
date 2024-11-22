@@ -28,5 +28,4 @@ front/dist
 back/node_modules
 back/dist
 
-classroom-project-backend/src/config
 classroom-project-fontend/yarn.lock
