@@ -1,5 +1,3 @@
-import config from "~/config";
-
 import {
   Authentication,
   HomePage,
@@ -8,8 +6,10 @@ import {
   Classroom,
   FlashCardPage,
   EditFlashcardPage,
+  MessengerPage,
 } from "~/pages";
 import Default from "~/layouts/Default";
+import config from "~/config";
 
 const publicRoutes = [
   {
@@ -30,6 +30,11 @@ const publicRoutes = [
   },
   { path: config.routes.flashCards, component: FlashCardPage, layout: Default },
   { path: config.routes.edit, component: EditFlashcardPage, layout: Default },
+  {
+    path: config.routes.messenger,
+    component: MessengerPage,
+    layout: Default,
+  },
 ];
 
 const privateRoutes = [];
