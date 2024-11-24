@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "admin",
+    "password": "nguyenhuuthang2004",
+    "database": "my_db",
+    "host": "database-2.cjwyu6a8i9zc.ap-southeast-2.rds.amazonaws.com",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "sagiri",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "sagiri",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
