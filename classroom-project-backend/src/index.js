@@ -4,16 +4,12 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const connectDB = require("./config/connectDB");
-const routes = require("./routes");
 
 const app = express();
 const PORT = 3000;
 
+// Middleware
 app.use(express.json());
-routes(app);
-
-connectDB();
-
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -21,6 +17,14 @@ app.use(
     credentials: true,
   })
 );
+
+// Import routes
+const classroomRoutes = require("./routes/classroom");
+
+// Use routes
+app.use(classroomRoutes);
+
+connectDB();
 
 const server = http.createServer(app);
 

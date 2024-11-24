@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const authController = require("~/controllers/ClassroomController");
+const ClassroomController = require("../controllers/ClassroomController");
 
-router.get("/", authController.getAll);
-router.post("/", authController.create);
-router.get("/all", authController.getAllClassrooms);
+router.get("/api/classroom", ClassroomController.getAll);
+router.post("/api/classroom", ClassroomController.create);
+router.get("/api/classroom/all", ClassroomController.getAllClassrooms);
 
 module.exports = router;
