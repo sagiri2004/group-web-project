@@ -27,7 +27,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "~/redux/authSlice";
 
 function Header() {
-  const user = useSelector((state) => state?.auth?.login.currentUser);
+  const user = useSelector((state) => state.auth.login.currentUser);
   const [anchorEl, setAnchorEl] = useState(null);
   const [subAnchorEl, setSubAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
@@ -113,11 +113,11 @@ function Header() {
       <MenuItem onClick={handleMenuClose}>
         <Avatar
           alt="123"
-          src={user?.profile?.avatar}
+          src={user?.avatar}
           sx={{ width: "32px", height: "32px" }}
         />
         <Typography variant="subtitle1" noWrap>
-          {user?.profile?.firstName} {user?.profile?.lastName}
+          {user?.name}
         </Typography>
       </MenuItem>
       <Divider />
@@ -250,7 +250,7 @@ function Header() {
         </Typography>
       </Box>
 
-      {user?.id ? (
+      {user ? (
         <Box
           sx={{
             display: "flex",
@@ -297,7 +297,7 @@ function Header() {
             {/* Avatar user */}
             <Avatar
               alt="Remy Sharp"
-              src={user?.profile?.avatar}
+              src={user.avatar}
               sx={{ width: "40px", height: "40px" }}
             />
           </IconButton>

@@ -6,10 +6,11 @@ export const loginUser = createAsyncThunk(
   async (user, { rejectWithValue }) => {
     try {
       const response = await apiClient.post("/auth/login", user);
-      return response?.data;
+      console.log("response", response);
+      return response?.data.data;
     } catch (error) {
       console.error("Login error:", error);
-      return rejectWithValue(error.response?.data || "Login failed");
+      return rejectWithValue(error.response?.data.data || "Login failed");
     }
   }
 );
@@ -19,10 +20,12 @@ export const registerUser = createAsyncThunk(
   async (user, { rejectWithValue }) => {
     try {
       const response = await apiClient.post("/auth/register", user);
-      return response?.data;
+      return response?.data.data;
     } catch (error) {
       console.error("Register error:", error);
-      return rejectWithValue(error.response?.data || "Registration failed");
+      return rejectWithValue(
+        error.response?.data.data || "Registration failed"
+      );
     }
   }
 );
@@ -34,7 +37,7 @@ export const logoutUser = createAsyncThunk(
       // await apiClient.post("/auth/logout");
     } catch (error) {
       console.error("Logout error:", error);
-      return rejectWithValue(error.response?.data || "Logout failed");
+      return rejectWithValue(error.response?.data.data || "Logout failed");
     }
   }
 );
@@ -49,7 +52,7 @@ const authSlice = createSlice({
         name: null,
         avatar: null,
       },
-      accessToken: null,
+      token: null,
       error: null,
       loading: false,
     },
@@ -78,7 +81,10 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.login.loading = false;
-        state.login.accessToken = action.payload?.accessToken;
+        state.login.token = action.payload?.token;
+        // luu token vao localStorage
+        localStorage.setItem("token", action.payload?.token);
+        console.log("action.payload?.user", action.payload);
         state.login.currentUser = action.payload?.user;
         state.login.error = null;
       })
@@ -95,7 +101,8 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.logout.loading = false;
         state.login.currentUser = null;
-        state.login.accessToken = null;
+        state.login.token = null;
+        localStorage.removeItem("token");
         state.logout.error = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {

@@ -9,7 +9,7 @@ const routes = {
   assignmentDetail: "/classroom/:classroomId/assignment/:assignmentId",
   flashCards: "/flashcards/:id",
   edit: "/flashcards/:id/edit",
-  messenger: "/messenger",
+  messenger: "/messenger/:receiverId",
 };
 
 export default routes;
