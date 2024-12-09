@@ -10,6 +10,16 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "classroomId",
         otherKey: "userId",
       });
+      Classroom.hasMany(models.Post, {
+        foreignKey: "classId",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+      Classroom.hasMany(models.Assignment, {
+        foreignKey: "classId",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
   Classroom.init(
