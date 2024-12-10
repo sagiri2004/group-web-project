@@ -24,6 +24,19 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Conversation, {
         foreignKey: "receiverId",
       });
+
+      // FlashcardSet associations
+      User.belongsToMany(models.FlashcardSet, {
+        through: "Users_FlashcardSets",
+        foreignKey: "userId",
+        otherKey: "flashcardSetId",
+        as: "flashcardSets",
+      });
+
+      // Post associations
+      User.hasMany(models.Post, {
+        foreignKey: "userId",
+      });
     }
   }
   User.init(
