@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon --exec babel-node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src -d dist && copyfiles -u 1 src/config/config.json dist/config"
+    "build": "npm install && babel src -d dist && copyfiles -u 1 src/config/config.json dist/config"
   },
   "author": "",
   "license": "ISC",
