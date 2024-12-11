@@ -27,7 +27,6 @@ module.exports = corsOptions;
 app.use(cors(corsOptions));
 
 app.use(express.json());
-routes(app);
 
 connectDB();
 
@@ -36,6 +35,8 @@ const { Op } = require("sequelize");
 
 app.post("/api/conversations", async (req, res) => {
   const { senderId, receiverId } = req.body;
+
+  console.log(senderId, receiverId);
 
   let conversation = await db.Conversation.findOne({
     where: {
@@ -130,6 +131,8 @@ io.on("connection", (socket) => {
     console.log("User disconnected:", socket.id);
   });
 });
+
+routes(app);
 
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

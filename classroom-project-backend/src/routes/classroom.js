@@ -16,21 +16,27 @@ router.get(
   "/list-assignment/:classroomId",
   authenticateToken,
   ClassroomController.listAssignment
-);
+); // oke
 // Nop bai cho assignment cua lop hoc
 router.post(
   "/submit-assignment",
   authenticateToken,
   ClassroomController.submitAssignment
-);
+); // oke
 // Lay ra assignment cua lop hoc
 router.get(
   "/get-assignment/:assignmentId",
   authenticateToken,
   ClassroomController.getAssignment
-);
+); // oke
 
 // Admin
+// check is admin
+router.get(
+  "/check-is-admin/:classroomId",
+  authenticateToken,
+  ClassroomController.checkIsAdmin
+); // oke
 // Tao lop hoc
 router.post("/create", authenticateToken, ClassroomController.createClassroom); // oke
 // Xoa lop hoc
@@ -61,14 +67,15 @@ router.post(
   authenticateToken,
   checkIsAdmin,
   ClassroomController.addAssignment
-);
+); // oke
 // Lay ra cac bai nop cua assignment
-router.get(
+router.post(
   "/list-submission/:assignmentId",
   authenticateToken,
   checkIsAdmin,
   ClassroomController.listSubmission
-);
+); // oke
+
 // Tao post trong lop hoc
 router.post("/create-post", authenticateToken, ClassroomController.createPost);
 // Lay ra tat ca cac post trong lop hoc
@@ -82,6 +89,13 @@ router.delete(
   "/delete-post/:postId",
   authenticateToken,
   ClassroomController.deletePost
+);
+
+// lay ra thong tin cua classroom
+router.get(
+  "/:classroomId",
+  authenticateToken,
+  ClassroomController.getClassroom
 );
 
 module.exports = router;
