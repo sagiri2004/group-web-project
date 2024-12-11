@@ -7,9 +7,9 @@ const connectDB = require("./config/connectDB");
 const routes = require("./routes");
 
 const app = express();
-const PORT = 3000;
+const port = process.env.PORT || 3000;
 
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = ["https://group-web-project-omega.vercel.app/"];
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -58,7 +58,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://group-web-project-omega.vercel.app/",
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -134,6 +134,6 @@ io.on("connection", (socket) => {
 
 routes(app);
 
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
