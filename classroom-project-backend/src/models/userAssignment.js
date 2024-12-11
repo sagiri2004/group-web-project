@@ -15,6 +15,13 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+      // user classroom
+      UserAssignment.belongsTo(models.UserClassroom, {
+        foreignKey: "userId",
+        targetKey: "userId",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
     }
   }
 

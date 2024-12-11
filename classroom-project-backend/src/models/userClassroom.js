@@ -10,6 +10,10 @@ module.exports = (sequelize) => {
       UserClassroom.belongsTo(models.User, {
         foreignKey: "userId",
       });
+      UserClassroom.hasMany(models.UserAssignment, {
+        foreignKey: "userId",
+        sourceKey: "userId",
+      });
     }
   }
 

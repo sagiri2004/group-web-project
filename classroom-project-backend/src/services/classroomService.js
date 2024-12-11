@@ -1,6 +1,7 @@
 const db = require("~/models");
 const { Op } = require("sequelize");
 
+// fix
 async function joinClassroom(user, classroomId) {
   const classroom = await db.Classroom.findByPk(classroomId);
 
@@ -27,6 +28,7 @@ async function joinClassroom(user, classroomId) {
 
   return {
     message: "Join classroom successfully",
+    data: { classroom },
   };
 }
 
@@ -56,11 +58,12 @@ async function leaveClassroom(user, classroomId) {
   };
 }
 
-// oke
+// oke // lai ko oke r
 async function listClassroom(user) {
   const userClassrooms = await db.UserClassroom.findAll({
     where: {
       userId: user.id,
+      isAdmin: false,
     },
     include: db.Classroom,
   });
@@ -198,17 +201,33 @@ async function removeUser(user, classroomId, userId) {
   };
 }
 
-async function listUsers(classroomId) {
+async function listUsers(user, classroomId) {
+  // lay ra toan bo user trong lop hoc va lay ra ca so luong bai nop cua tung user va tong so assignment
+  // van tra ve user neu user chua nop bai
   const users = await db.UserClassroom.findAll({
     where: {
       classroomId,
     },
-    include: db.User,
+    include: [
+      db.User,
+      {
+        model: db.UserAssignment,
+        include: db.Assignment,
+      },
+    ],
   });
 
   const data = users.map((item) => {
-    const { id, username, name, avatar } = item.User;
-    return { id, username, name, avatar };
+    const { User, UserAssignments } = item;
+    return {
+      id: User.id,
+      username: User.username,
+      name: User.name,
+      avatar: User.avatar,
+      assignmentCount: UserAssignments.length,
+      isAdmin: item.isAdmin,
+      UserAssignments,
+    };
   });
 
   return {
@@ -217,7 +236,7 @@ async function listUsers(classroomId) {
   };
 }
 
-async function addAssignment(user, classroomId, title, description, deadline) {
+async function addAssignment(user, classroomId, title, description, dueDate) {
   const classroom = await db.Classroom.findByPk(classroomId);
 
   if (!classroom) {
@@ -238,10 +257,10 @@ async function addAssignment(user, classroomId, title, description, deadline) {
   }
 
   const assignment = await db.Assignment.create({
-    classroomId,
+    classId: classroomId,
     title,
     description,
-    deadline,
+    dueDate,
   });
 
   return {
@@ -302,11 +321,16 @@ async function listAssignment(user, classroomId) {
     };
   });
 
-  return result;
+  return {
+    data: result,
+    message: "List assignment successfully",
+  };
 }
 
 async function submitAssignment(user, assignmentId, content) {
   const assignment = await db.Assignment.findByPk(assignmentId);
+
+  console.log(assignment);
 
   if (!assignment) {
     throw new Error("Assignment not found");
@@ -315,7 +339,7 @@ async function submitAssignment(user, assignmentId, content) {
   const userClassroom = await db.UserClassroom.findOne({
     where: {
       userId: user.id,
-      classroomId: assignment.classroomId,
+      classroomId: assignment.classId,
     },
   });
 
@@ -323,14 +347,36 @@ async function submitAssignment(user, assignmentId, content) {
     throw new Error("User not in classroom");
   }
 
-  const submission = await db.Submission.create({
-    assignmentId,
-    userId: user.id,
-    content,
-  });
+  // check neu da nop truoc do thi chi update content
+  let userAssignment;
+
+  try {
+    userAssignment = await db.UserAssignment.findOne({
+      where: {
+        assignmentId,
+        userId: user.id,
+      },
+    });
+  } catch (error) {
+    console.error("Error finding user assignment:", error);
+    throw new Error("Error finding user assignment");
+  }
+
+  if (userAssignment) {
+    await userAssignment.update({ content });
+  }
+
+  // Neu chua nop thi tao moi
+  if (!userAssignment) {
+    await db.UserAssignment.create({
+      assignmentId,
+      userId: user.id,
+      content,
+    });
+  }
 
   return {
-    data: { submission },
+    data: { assignment },
     message: "Submit assignment successfully",
   };
 }
@@ -343,24 +389,31 @@ async function getAssignment(user, assignmentId) {
   }
 
   // them cac truong de check xem user da nop bai chua, nop dung han hay muon
-  const userSubmission = await db.userAssignment.findOne({
-    where: {
-      assignmentId,
-      userId: user.id,
-    },
-  });
+  let userSubmission;
+  try {
+    userSubmission = await db.UserAssignment.findOne({
+      where: {
+        assignmentId,
+        userId: user.id,
+      },
+    });
+  } catch (error) {
+    console.error("Error finding user assignment:", error);
+    throw new Error("Error finding user assignment");
+  }
+
+  // console.log(userSubmission);
 
   const data = {
     id: assignment.id,
     title: assignment.title,
     description: assignment.description,
-    deadline: assignment.deadline,
-    userSubmission: userSubmission
-      ? {
-          content: userSubmission.content,
-          status: userSubmission.status,
-        }
-      : null,
+    dueDate: assignment.dueDate,
+    isSubmitted: userSubmission !== null,
+    isOnTime:
+      userSubmission &&
+      new Date(userSubmission.updatedAt) <= new Date(assignment.dueDate),
+    content: userSubmission ? userSubmission.content : null,
   };
 
   return {
@@ -369,41 +422,73 @@ async function getAssignment(user, assignmentId) {
   };
 }
 
-async function listSubmission(user, assignmentId) {
-  const assignment = await db.Assignment.findByPk(assignmentId);
+async function listSubmission(user, assignmentId, classroomId) {
+  try {
+    const assignment = await db.Assignment.findByPk(assignmentId);
 
-  if (!assignment) {
-    throw new Error("Assignment not found");
-  }
+    if (!assignment) {
+      throw new Error("Assignment not found");
+    }
 
-  const submissions = await db.addAssignment.findAll({
-    where: {
-      assignmentId,
-    },
-
-    include: db.User,
-  });
-
-  // them cac truong de phan biet nop muon hay dung han
-  const data = submissions.map((item) => {
-    const { id, content, createdAt, User } = item;
-    return {
-      id,
-      content,
-      createdAt,
-      User: {
-        id: User.id,
-        username: User.username,
-        name: User.name,
-        avatar: User.avatar,
+    const userClassroom = await db.UserClassroom.findOne({
+      where: {
+        userId: user.id,
+        classroomId,
       },
-    };
-  });
+    });
 
-  return {
-    data,
-    message: "List submission successfully",
-  };
+    if (!userClassroom) {
+      throw new Error("User not in classroom");
+    }
+
+    const submissions = await db.UserAssignment.findAll({
+      where: {
+        assignmentId,
+      },
+      include: db.User,
+    });
+
+    const userSubmission = submissions.map((item) => {
+      const { id, content, createdAt, User } = item;
+      return {
+        id,
+        content,
+        createdAt,
+        User: {
+          id: User.id,
+          username: User.username,
+          name: User.name,
+          avatar: User.avatar,
+        },
+      };
+    });
+
+    // Lay ra so luong user da nop bai, tong user trong lop
+    const totalUser = await db.UserClassroom.count({
+      where: {
+        classroomId,
+      },
+    });
+
+    const totalSubmitted = await db.UserAssignment.count({
+      where: {
+        assignmentId,
+      },
+    });
+
+    return {
+      data: {
+        assignment,
+        userSubmission,
+        totalSubmitted,
+        totalUser,
+      },
+      message: "List submission successfully",
+    };
+  } catch (error) {
+    console.error("Error listing submissions:", error);
+    throw new Error("Error listing submissions");
+  }
 }
 
 async function createPost(user, classroomId, title, content) {
@@ -502,6 +587,41 @@ async function deletePost(user, postId) {
   };
 }
 
+async function checkIsAdmin(user, classroomId) {
+  const userClassroom = await db.UserClassroom.findOne({
+    where: {
+      userId: user.id,
+      classroomId,
+      isAdmin: true,
+    },
+  });
+
+  if (!userClassroom) {
+    return {
+      message: "User is not admin of classroom",
+      isAdmin: false,
+    };
+  }
+
+  return {
+    message: "User is admin of classroom",
+    isAdmin: true,
+  };
+}
+
+async function getClassroom(user, classroomId) {
+  const classroom = await db.Classroom.findByPk(classroomId);
+
+  if (!classroom) {
+    throw new Error("Classroom not found");
+  }
+
+  return {
+    data: { classroom },
+    message: "Get classroom successfully",
+  };
+}
+
 module.exports = {
   joinClassroom,
   leaveClassroom,
@@ -519,4 +639,6 @@ module.exports = {
   createPost,
   listPost,
   deletePost,
+  checkIsAdmin,
+  getClassroom,
 };

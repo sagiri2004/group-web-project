@@ -1,32 +1,31 @@
 const db = require("../models");
 
-async function checkIsAdmin(req, res, next) {
-  const user = req.user;
-  const { classroomId } = req.body;
+const checkIsAdmin = (req, res, next) => {
+  let classroomId = req.body.classroomId;
 
-  // neu khong co trong body thi lay tu params
   if (!classroomId) {
     classroomId = req.params.classroomId;
   }
 
-  // check user is admin of classroom
-  const userClassroom = await db.UserClassroom.findOne({
+  const userId = req.user.id;
+
+  db.UserClassroom.findOne({
     where: {
-      userId: user.id,
+      userId,
       classroomId,
       isAdmin: true,
     },
-  });
-
-  console.log(userClassroom);
-
-  if (!userClassroom) {
-    return res.status(403).json({
-      message: "User is not admin of classroom",
+  })
+    .then((userClassroom) => {
+      if (!userClassroom) {
+        return res.status(403).json({ message: "User is not an admin" });
+      }
+      next();
+    })
+    .catch((error) => {
+      console.error("Error checking admin status:", error);
+      res.status(500).json({ message: "Internal server error" });
     });
-  }
-
-  next();
-}
+};
 
 module.exports = checkIsAdmin;
