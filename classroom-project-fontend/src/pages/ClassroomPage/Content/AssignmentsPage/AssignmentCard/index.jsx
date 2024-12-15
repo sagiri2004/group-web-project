@@ -1,11 +1,8 @@
 import React from "react";
-import { Card, Typography, Box, Avatar } from "@mui/material";
-import { green } from "@mui/material/colors";
+import { Card, Typography, Box } from "@mui/material";
 
 const AssignmentCard = ({
-  img,
   title,
-  className,
   creationTime,
   dueTime,
   dueStatus,
@@ -16,6 +13,7 @@ const AssignmentCard = ({
       onClick={onClick}
       sx={{
         display: "flex",
+        flexDirection: "column",
         borderRadius: 2,
         padding: 2,
         cursor: "pointer",
@@ -23,36 +21,22 @@ const AssignmentCard = ({
         my: 1,
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
-        {img ? (
-          <Avatar src={img} sx={{ width: 56, height: 56 }} />
-        ) : (
-          <Avatar sx={{ bgcolor: green[500], width: 56, height: 56 }}>
-            St
-          </Avatar>
-        )}
-      </Box>
-      <Box>
-        <Typography variant="h6" component="div">
-          {title}
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          Class: {className}
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          Created: {creationTime}
-        </Typography>
-        <Typography variant="body2" color="error">
-          Due: {dueTime.toLocaleString()}
-        </Typography>
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          sx={{ fontWeight: "bold" }}
-        >
-          {dueStatus}
-        </Typography>
-      </Box>
+      <Typography variant="h6" component="div">
+        {title}
+      </Typography>
+      <Typography variant="body2" color="textSecondary">
+        Created: {creationTime}
+      </Typography>
+      <Typography variant="body2" color="error">
+        Due: {dueTime.toLocaleString()}
+      </Typography>
+      <Typography
+        variant="body2"
+        color="textSecondary"
+        sx={{ fontWeight: "bold" }}
+      >
+        {dueStatus}
+      </Typography>
     </Card>
   );
 };

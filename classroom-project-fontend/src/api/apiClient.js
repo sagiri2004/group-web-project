@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://group-web-project-3.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -20,5 +20,19 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// neu token het han, thi logout va chuyen huong ve trang login
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default apiClient;

@@ -1,5 +1,6 @@
 import { Paper, Avatar, Typography } from "@mui/material";
 import { experimentalStyled as styled } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -13,10 +14,15 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function ClassroomItem({ classroom }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/classroom/${classroom.id}`);
+  };
   return (
-    <Item>
+    <Item onClick={handleClick} sx={{ cursor: "pointer" }}>
       <Avatar
-        src={classroom.avatar}
+        src={classroom.imageUrl}
         alt={classroom.name}
         sx={{ width: 56, height: 56, margin: "auto", mb: 2 }}
       />

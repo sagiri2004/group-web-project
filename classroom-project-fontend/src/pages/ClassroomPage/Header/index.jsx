@@ -12,9 +12,10 @@ function a11yProps(index) {
 const headerPages = {
   home: 0,
   assignments: 1,
+  admin: 2,
 };
 
-function Header({ page }) {
+function Header({ page, isAdmin }) {
   const [value, setValue] = useState(0);
 
   useEffect(() => {
@@ -27,8 +28,10 @@ function Header({ page }) {
     setValue(newValue);
     if (newValue === 0) {
       navigate(`/classroom/${classroomId}`);
-    } else {
+    } else if (newValue === 1) {
       navigate(`/classroom/${classroomId}/assignments`);
+    } else if (newValue === 2) {
+      navigate(`/classroom/${classroomId}/admin`);
     }
   };
   return (
@@ -58,6 +61,7 @@ function Header({ page }) {
         >
           <Tab label="Home" {...a11yProps(0)} />
           <Tab label="Assignment" {...a11yProps(1)} />
+          {isAdmin && <Tab label="Admin" {...a11yProps(2)} />}
         </Tabs>
       </Box>
     </Box>

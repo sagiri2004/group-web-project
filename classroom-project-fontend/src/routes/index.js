@@ -28,6 +28,11 @@ const publicRoutes = [
     component: Classroom,
     layout: Default,
   },
+  {
+    path: config.routes.classroomAdmin,
+    component: Classroom,
+    layout: Default,
+  },
   { path: config.routes.flashCards, component: FlashCardPage, layout: Default },
   { path: config.routes.edit, component: EditFlashcardPage, layout: Default },
   {
