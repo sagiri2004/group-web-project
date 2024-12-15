@@ -384,6 +384,7 @@ async function getMyFlashcardSets(user) {
 
   const flashcardSetIds = flashcardSetUsers.map((item) => item.flashcardSetId);
 
+  // lay ra ca nguoi da tao
   const flashcardSets = await db.FlashcardSet.findAll({
     where: { id: flashcardSetIds },
     attributes: ["id", "title", "description"],
@@ -398,6 +399,38 @@ async function getMyFlashcardSets(user) {
   };
 }
 
+//lay ra user tao ra flashcard set bang flashcardSetId
+async function getUserByFlashcardSetId(flashcardSetId) {
+  const flashcardSetUser = await db.FlashcardSetUser.findOne({
+    where: { flashcardSetId, isCreator: true },
+    include: [
+      {
+        model: db.User,
+        as: "user",
+        attributes: ["id", "name", "avatar"],
+      },
+    ],
+  });
+
+  if (!flashcardSetUser) {
+    return {
+      message: "User not found",
+      data: null,
+    };
+  }
+
+  const user = flashcardSetUser.user;
+
+  return {
+    message: "Fetch user successfully",
+    data: {
+      id: user.id,
+      name: user.name,
+      avatar: user.avatar,
+    },
+  };
+}
+
 module.exports = {
   getFlashcardSet,
   createFlashcardSet,
@@ -406,4 +439,5 @@ module.exports = {
   deleteFlashcard,
   createFlashcard,
   getMyFlashcardSets,
+  getUserByFlashcardSetId,
 };

@@ -114,6 +114,20 @@ class FlashcardsController {
       });
     }
   }
+
+  // lay ra user tao ra flashcard set
+  async getUserByFlashcardSetId(req, res) {
+    const { id } = req.params;
+    try {
+      const result = await flashcardService.getUserByFlashcardSetId(id);
+      res.json(result);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  }
 }
 
 module.exports = new FlashcardsController();
