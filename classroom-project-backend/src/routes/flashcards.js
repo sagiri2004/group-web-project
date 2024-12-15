@@ -23,4 +23,7 @@ router.get(
 router.get("/:id", checkUserLoggedIn, flashcardsController.getFlashcardSet); // ok
 router.delete("/:id", flashcardsController.deleteFlashcardSet); // ok
 
+// lay ra user tao ra flashcard set
+router.get("/author/:id", flashcardsController.getUserByFlashcardSetId);
+
 module.exports = router;

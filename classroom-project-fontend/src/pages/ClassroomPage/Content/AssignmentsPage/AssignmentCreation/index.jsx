@@ -9,8 +9,11 @@ import {
   Box,
   useTheme,
 } from "@mui/material";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 const AssignmentCreation = ({ open, onClose, onCreate, dialogRef }) => {
   const theme = useTheme();
@@ -82,23 +85,20 @@ const AssignmentCreation = ({ open, onClose, onCreate, dialogRef }) => {
             helperText={errors.title ? "Title is required" : ""}
           />
 
-          <DatePicker
-            selected={dueDate}
-            onChange={(date) => {
-              setDueDate(date);
-              setErrors((prev) => ({ ...prev, dueDate: false }));
-            }}
-            customInput={
-              <TextField
-                label="Due Date"
-                variant="outlined"
-                fullWidth
-                error={errors.dueDate}
-                helperText={errors.dueDate ? "Due date is required" : ""}
-              />
-            }
-            wrapperClassName="date-picker"
-          />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Due Date"
+              inputFormat="MM/dd/yyyy"
+              value={dueDate}
+              onChange={(newValue) => {
+                setDueDate(newValue);
+                setErrors((prev) => ({ ...prev, dueDate: false }));
+              }}
+              renderInput={(params) => <TextField {...params} />}
+              error={errors.dueDate}
+              helperText={errors.dueDate ? "Due date is required" : ""}
+            />
+          </LocalizationProvider>
 
           <TextField
             label="Instructions"

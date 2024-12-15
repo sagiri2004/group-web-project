@@ -5,7 +5,8 @@ import CropFreeIcon from "@mui/icons-material/CropFree";
 import ArrowCircleRightOutlinedIcon from "@mui/icons-material/ArrowCircleRightOutlined";
 import ArrowCircleLeftOutlinedIcon from "@mui/icons-material/ArrowCircleLeftOutlined";
 import { IconButton, Box, Typography, LinearProgress } from "@mui/material";
-
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 function Footer({
   handlePrevFlashcard,
   handleNextFlashcard,
@@ -13,6 +14,14 @@ function Footer({
   flashcardsLength,
 }) {
   const progress = ((currentFlashcardIndex + 1) / flashcardsLength) * 100;
+  const flashcardSetID = useSelector((state) => state.flashcardSet.data.id);
+
+  const navigate = useNavigate();
+
+  const handleSettingsClick = () => {
+    navigate(`/flashcards/${flashcardSetID}/edit`);
+  };
+
   return (
     <Box>
       <Box
@@ -53,7 +62,7 @@ function Footer({
           </IconButton>
         </Box>
         <Box>
-          <IconButton>
+          <IconButton onClick={handleSettingsClick}>
             <SettingsIcon />
           </IconButton>
           <IconButton>

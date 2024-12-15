@@ -7,6 +7,7 @@ import {
   FlashCardPage,
   EditFlashcardPage,
   MessengerPage,
+  MyFlashcardSetPage,
 } from "~/pages";
 import Default from "~/layouts/Default";
 import config from "~/config";
@@ -28,8 +29,18 @@ const publicRoutes = [
     component: Classroom,
     layout: Default,
   },
+  {
+    path: config.routes.classroomAdmin,
+    component: Classroom,
+    layout: Default,
+  },
   { path: config.routes.flashCards, component: FlashCardPage, layout: Default },
   { path: config.routes.edit, component: EditFlashcardPage, layout: Default },
+  {
+    path: config.routes.myFlashcardSets,
+    component: MyFlashcardSetPage,
+    layout: Default,
+  },
   {
     path: config.routes.messenger,
     component: MessengerPage,

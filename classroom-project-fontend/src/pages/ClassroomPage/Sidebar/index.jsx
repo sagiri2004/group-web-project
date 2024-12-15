@@ -104,7 +104,7 @@ function Sidebar({ classroom }) {
         </Button>
         <Avatar
           variant="rounded"
-          src={classroom.image}
+          src={classroom.imageUrl}
           sx={{
             width: 80,
             height: 80,

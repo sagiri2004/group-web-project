@@ -1,21 +1,32 @@
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Content from "./Content";
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-const fakeClassroomAPI = {
-  id: "1",
-  name: "Classroom 1",
-  image:
-    "https://scontent.fhan4-4.fna.fbcdn.net/v/t1.6435-9/201079238_323114566124845_3047653232260396125_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=bd9a62&_nc_eui2=AeFrEzkvGO6ywRIkle0uNKYOsDUUwcJe0nywNRTBwl7SfNufHzoEI7QvxK116Vl11GSHhum4TvI8aea8r_CFEqrA&_nc_ohc=EFNPiVSEHIAQ7kNvgH515bi&_nc_zt=23&_nc_ht=scontent.fhan4-4.fna&_nc_gid=AXK8ekjNpLJ9lU8uhVJ4qqC&oh=00_AYCpHHGVWfP_4OfLx4clkIIH-oQCrgNtIP9Bh2Txp02mOQ&oe=67487D53",
-};
+import apiClient from "~/api/apiClient";
 
 function ClassroomPage() {
   const location = useLocation();
   const [currentPath, setCurrentPath] = useState("home");
+  const { classroomId } = useParams();
+  const [classroom, setClassroom] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    apiClient.get(`/classroom/${classroomId}`).then((res) => {
+      console.log(res);
+      setClassroom(res.data.data.classroom);
+      setLoading(false);
+    });
+
+    apiClient.get(`/classroom/check-is-admin/${classroomId}`).then((res) => {
+      console.log(res);
+      setIsAdmin(res.data.isAdmin);
+    });
+  }, [classroomId]);
 
   useEffect(() => {
     if (
@@ -23,10 +34,27 @@ function ClassroomPage() {
       location.pathname.includes("assignment")
     ) {
       setCurrentPath("assignments");
+    } else if (location.pathname.includes("admin")) {
+      setCurrentPath("admin");
     } else {
       setCurrentPath("home");
     }
   }, [location]);
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -35,7 +63,7 @@ function ClassroomPage() {
         minHeight: "100vh",
       }}
     >
-      <Sidebar classroom={fakeClassroomAPI} />
+      <Sidebar classroom={classroom} />
       <Box
         sx={{
           display: "flex",
@@ -43,7 +71,7 @@ function ClassroomPage() {
           flexGrow: 1,
         }}
       >
-        <Header page={currentPath} />
+        <Header page={currentPath} isAdmin={isAdmin} />
         <Content page={currentPath} />
       </Box>
     </Box>
