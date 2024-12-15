@@ -6,3 +6,4 @@ export { default as Classroom } from "./ClassroomPage";
 export { default as FlashCardPage } from "./FlashCardPage";
 export { default as EditFlashcardPage } from "./EditFlashcardPage";
 export { default as MessengerPage } from "./MessengerPage";
+export { default as MyFlashcardSetPage } from "./MyFlashcardSetPage";

@@ -5,20 +5,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import MiniFlashcard from "./MiniFlashcard";
 import { calculateTimeSince } from "~/utils/timeUtils";
 
-// demo data user
-const user = {
-  id: 2,
-  username: "sagiri",
-  email: "sagiri123@g.vc",
-  profile: {
-    firstName: "Sagiri",
-    lastName: "Izumi",
-    avatar:
-      "https://res.cloudinary.com/dkidy104q/image/upload/v1724988336/uploads/1724988332868-1667189565554.jpg.jpg",
-  },
-};
-
-function DetailFlashcards({ orderedFlashcards = [], createdAt }) {
+function DetailFlashcards({ orderedFlashcards = [], createdAt, user }) {
+  console.log("DetailFlashcards:", orderedFlashcards, createdAt, user);
   return (
     <Box
       sx={{
@@ -46,7 +34,7 @@ function DetailFlashcards({ orderedFlashcards = [], createdAt }) {
           <IconButton>
             <Avatar
               alt="123"
-              src={user.profile.avatar}
+              src={user.avatar}
               sx={{ width: "48px", height: "48px" }}
             />
           </IconButton>
@@ -54,9 +42,7 @@ function DetailFlashcards({ orderedFlashcards = [], createdAt }) {
             <Typography variant="caption" color="text.secondary">
               Create by
             </Typography>
-            <Typography fontWeight="600">
-              {user.profile.firstName} {user.profile.lastName}
-            </Typography>
+            <Typography fontWeight="600">{user.name || "Unknown"}</Typography>
             <Typography variant="caption" color="text.secondary">
               Created {calculateTimeSince(createdAt)} ago
             </Typography>
@@ -82,7 +68,7 @@ function DetailFlashcards({ orderedFlashcards = [], createdAt }) {
       <Typography fontWeight="600" fontSize="1.5rem">
         Terms in this set ({orderedFlashcards.length})
       </Typography>
-      
+
       <Box
         sx={{
           display: "flex",

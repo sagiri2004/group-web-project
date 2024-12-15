@@ -10,6 +10,7 @@ const routes = {
   assignmentDetail: "/classroom/:classroomId/assignment/:assignmentId",
   flashCards: "/flashcards/:id",
   edit: "/flashcards/:id/edit",
+  myFlashcardSets: "/flashcards",
   messenger: "/messenger/:receiverId",
 };
 

@@ -18,7 +18,7 @@ export const fetchFlashcardSet = createAsyncThunk(
   "flashcardSet/fetchFlashcardSet",
   async (flashcardSetId, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(`/flashcards/${flashcardSetId}`);
+      const response = await apiClient.get(`/flashcard/${flashcardSetId}`);
       console.log("Fetch flashcard set response:", response.data);
       return response.data.data;
     } catch (error) {
@@ -34,7 +34,7 @@ export const saveChanges = createAsyncThunk(
     try {
       const state = getState();
       const changes = state.flashcardSet.changes;
-      const response = await apiClient.put(`/flashcards/terms/save`, changes);
+      const response = await apiClient.put(`/flashcard/terms/save`, changes);
 
       return response.data;
     } catch (error) {
@@ -48,7 +48,7 @@ export const saveChangeOrder = createAsyncThunk(
   "flashcardSet/saveChangeOrder",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await apiClient.put(`/flashcards/terms/save`, data);
+      const response = await apiClient.put(`/flashcard/terms/save`, data);
       return response.data;
     } catch (error) {
       console.error("Change order error:", error);
@@ -63,7 +63,7 @@ export const deleteFlashcard = createAsyncThunk(
     try {
       // console.log("Delete flashcard:", flashcardId);
       const response = await apiClient.delete(
-        `/flashcards/terms/${flashcardId}`
+        `/flashcard/terms/${flashcardId}`
       );
       return response.data;
     } catch (error) {

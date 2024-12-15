@@ -31,6 +31,20 @@ function Default({ children }) {
             display: "flex",
             flexDirection: "column",
             flexGrow: 1,
+            overflow: "auto",
+            //css scroll bar
+            "&::-webkit-scrollbar": {
+              width: "8px",
+              height: "8px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#6a5af9",
+              borderRadius: "50px",
+              backgroundImage: "linear-gradient(-45deg, #6a5af9, #d66efd)",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "white",
+            },
           }}
         >
           <Box>{children}</Box>

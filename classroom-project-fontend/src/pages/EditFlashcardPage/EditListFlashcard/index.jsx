@@ -60,7 +60,7 @@ function EditListFlashcard({ flashcards, flashcardOrderIds, flashcardSetId }) {
       const newOrderedFlashcards = mapOrder(
         flashcards,
         flashcardOrderIds,
-        "id"
+        "_id"
       );
       console.log("New ordered flashcards:", newOrderedFlashcards);
       setOrderedFlashcards(newOrderedFlashcards);
@@ -78,16 +78,17 @@ function EditListFlashcard({ flashcards, flashcardOrderIds, flashcardSetId }) {
       return;
     }
 
+    // check if the dragged item is different from the dropped item
     if (active.id === over.id) {
       return;
     }
 
     const oldIndex = orderedFlashcards.findIndex(
-      (flashcard) => flashcard.id === active.id
+      (flashcard) => flashcard._id === active.id
     );
 
     const newIndex = orderedFlashcards.findIndex(
-      (flashcard) => flashcard.id === over.id
+      (flashcard) => flashcard._id === over.id
     );
 
     const newOrderedFlashcards = arrayMove(
@@ -121,12 +122,13 @@ function EditListFlashcard({ flashcards, flashcardOrderIds, flashcardSetId }) {
   const handleAddFlashcard = async () => {
     try {
       // Gửi yêu cầu tạo flashcard mới
-      const response = await apiClient.post(`/flashcards/terms`, {
+      const response = await apiClient.post(`/flashcard/terms`, {
         setId: flashcardSetId,
       });
 
       const newFlashcardId = response?.data?.data?.id;
 
+      // Tạo flashcard mới với dữ liệu mặc định
       const newFlashcard = {
         id: newFlashcardId,
         word: "",
@@ -135,16 +137,19 @@ function EditListFlashcard({ flashcards, flashcardOrderIds, flashcardSetId }) {
 
       console.log("New flashcard:", newFlashcard);
 
+      // Cập nhật danh sách flashcards
       const updatedFlashcards = [...orderedFlashcards, newFlashcard];
       setOrderedFlashcards(updatedFlashcards);
 
+      // Đợi state cập nhật trước khi cuộn trang
       setTimeout(() => {
         window.scrollBy({
-          top: 200,
-          behavior: "smooth",
+          top: 200, // Dịch xuống 150 pixel
+          behavior: "smooth", // Cuộn mượt mà
         });
-      }, 200);
+      }, 200); // Thêm thời gian nhỏ để đảm bảo state được cập nhật
 
+      // Dispatch hành động để thêm flashcard vào store
       dispatch(
         addFlashcard({
           flashcardSetId,
@@ -166,7 +171,7 @@ function EditListFlashcard({ flashcards, flashcardOrderIds, flashcardSetId }) {
     >
       <SortableContext
         items={orderedFlashcards
-          .map((flashcard) => flashcard.id)
+          .map((flashcard) => flashcard._id)
           .filter((id) => id !== undefined)}
         strategy={verticalListSortingStrategy}
       >
@@ -180,7 +185,7 @@ function EditListFlashcard({ flashcards, flashcardOrderIds, flashcardSetId }) {
         >
           {orderedFlashcards.map((flashcard, index) => (
             <EditFlashcard
-              key={flashcard.id || flashcard.id}
+              key={flashcard._id || flashcard.id}
               flashcard={flashcard}
               flashcardSetId={flashcardSetId}
               rank={index + 1}
