@@ -17,6 +17,31 @@ class MessageController {
 
     res.json(conversations);
   }
+
+  async createConversation(req, res) {
+    const receiverId = req.body.receiverId;
+    const senderId = req.user.id;
+
+    const conversation = await messageService.createConversation(
+      senderId,
+      receiverId
+    );
+
+    res.json(conversation);
+  }
+
+  // tao conversation voi name
+  async createConversationWithName(req, res) {
+    const senderId = req.user.id;
+    const name = req.body.name;
+
+    const conversation = await messageService.createConversationWithName(
+      senderId,
+      name
+    );
+
+    res.json(conversation);
+  }
 }
 
 module.exports = new MessageController();

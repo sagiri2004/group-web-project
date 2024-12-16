@@ -90,7 +90,6 @@ const ChatApp = () => {
   const [receiverId, setReceiverId] = useState(
     useParams().receiverId || contacts[0]?.id
   );
-  // lay ra user tu redux
   const user = useSelector((state) => state.auth.login.currentUser);
   const senderId = user.id;
 
@@ -104,10 +103,6 @@ const ChatApp = () => {
     const getConversations = async () => {
       try {
         const { data } = await apiClient.get("/messages");
-        let user = [];
-        // tach user ra khoi conversation
-        data.forEach((conversation) => {});
-
         setContacts(data);
       } catch (error) {
         console.error("Error getting conversations:", error);
@@ -120,29 +115,23 @@ const ChatApp = () => {
   useEffect(() => {
     const createOrGetConversation = async () => {
       try {
-        const { data } = await apiClient.post(`/conversations`, {
+        const { data } = await apiClient.post(`/messages/conversations`, {
           senderId,
           receiverId,
         });
         setCurrentConversation(data);
-        console.log("Conversation created:", data);
-
-        // Join conversation room
         socket.emit("join_conversation", data.id);
       } catch (error) {
         console.error("Error creating conversation:", error);
       }
     };
 
-    // get messages
     const getMessages = async () => {
       try {
         const { data } = await apiClient.get(`/messages/${receiverId}`);
-        // them truong isOwn de phan biet tin nhan cua minh va nguoi khac
         data.forEach((message) => {
           message.isOwn = message.senderId === senderId;
         });
-        console.log("Messages:", data);
         setMessages(data);
       } catch (error) {
         console.error("Error getting messages:", error);
@@ -171,17 +160,13 @@ const ChatApp = () => {
     setNewMessage("");
   };
 
-  // khi chuyen cuoc tro chuyen khac
   const handleSwitchConversation = (conversationId) => {
     setCurrentConversation(conversationId);
     socket.emit("leave_conversation", conversationId);
-
-    // chuyen sang cuoc tro chuyen khac bang cach thay doi receiverId
     setReceiverId(conversationId);
   };
 
   useEffect(() => {
-    // Lắng nghe sự kiện nhận tin nhắn
     socket.on("receive_message", (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
     });
@@ -220,6 +205,22 @@ const ChatApp = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Handle search on Enter key
+  const handleSearch = async (e) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      try {
+        const { data } = await apiClient.post(`/messages/conversations/name`, {
+          name: searchQuery,
+          receiverId,
+        });
+        console.log("Search results:", data);
+        setContacts(data); // Update contacts list with search results
+      } catch (error) {
+        console.error("Error searching conversations:", error);
+      }
+    }
+  };
+
   return (
     <div>
       <ChatContainer>
@@ -232,6 +233,7 @@ const ChatApp = () => {
               size="small"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={handleSearch} // Listen for the Enter key
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -251,8 +253,8 @@ const ChatApp = () => {
                   "&:hover": {
                     backgroundColor:
                       contact.id === Number(receiverId)
-                        ? theme.palette.primary.dark // Màu hover cho mục được chọn
-                        : theme.palette.action.hover, // Màu hover mặc định cho mục khác
+                        ? theme.palette.primary.dark
+                        : theme.palette.action.hover,
                   },
                   backgroundColor:
                     contact.id === Number(receiverId)

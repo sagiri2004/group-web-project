@@ -75,7 +75,75 @@ async function getConversations(user) {
   }
 }
 
+async function createConversation(senderId, receiverId) {
+  try {
+    let conversation = await db.Conversation.findOne({
+      where: {
+        [Op.or]: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
+        ],
+      },
+    });
+
+    if (!conversation) {
+      conversation = await db.Conversation.create({ senderId, receiverId });
+    }
+
+    return conversation;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+async function createConversationWithName(senderId, name) {
+  try {
+    // tim user co name trung voi name
+    const receiver = await db.User.findOne({
+      where: {
+        name,
+      },
+    });
+
+    if (!receiver) {
+      // tra ve message loi neu khong tim thay user
+      return { message: "User not found" };
+    }
+
+    // tao conversation
+    const conversation = await createConversation(senderId, receiver.id);
+
+    // tra ve toan bo conversations da tao
+    const conversations = await db.Conversation.findAll({
+      where: {
+        [Op.or]: [{ senderId }, { receiverId }],
+      },
+      include: [
+        {
+          model: db.User,
+          attributes: ["id", "username", "avatar", "name"],
+        },
+        {
+          model: db.User,
+          attributes: ["id", "username", "avatar", "name"],
+        },
+      ],
+    });
+
+    // extract users from conversations
+    const users = extractUsers(conversations);
+
+    return users;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 module.exports = {
   getMessages,
   getConversations,
+  createConversation,
+  createConversationWithName,
 };

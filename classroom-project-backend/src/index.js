@@ -9,7 +9,7 @@ const routes = require("./routes");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = ["https://group-web-project-omega.vercel.app"];
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -57,7 +57,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://group-web-project-omega.vercel.app",
     methods: ["GET", "POST"],
     credentials: true,
   },

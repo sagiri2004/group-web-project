@@ -1,8 +1,7 @@
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import DescriptionIcon from "@mui/icons-material/Description";
-import LayersIcon from "@mui/icons-material/Layers";
+import MessageIcon from "@mui/icons-material/Message";
+import ClassIcon from "@mui/icons-material/Class";
+import StyleIcon from "@mui/icons-material/Style";
 import {
   Box,
   List,
@@ -11,46 +10,44 @@ import {
   Collapse,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import routes from "~/config/routes";
 
+// Define the navigation structure
 const NAVIGATION = [
   {
     segment: "dashboard",
     title: "Dashboard",
     icon: <DashboardIcon />,
+    route: routes.home,
   },
   {
-    segment: "orders",
-    title: "Orders",
-    icon: <ShoppingCartIcon />,
+    segment: "classroom",
+    title: "Classrooms",
+    icon: <ClassIcon />,
+    route: routes.classrooms,
   },
   {
-    segment: "reports",
-    title: "Reports",
-    icon: <BarChartIcon />,
-    children: [
-      {
-        segment: "sales",
-        title: "Sales",
-        icon: <DescriptionIcon />,
-      },
-      {
-        segment: "traffic",
-        title: "Traffic",
-        icon: <DescriptionIcon />,
-      },
-    ],
+    segment: "flashcards",
+    title: "Flashcards",
+    icon: <StyleIcon />,
+    route: routes.myFlashcardSets,
   },
   {
-    segment: "integrations",
-    title: "Integrations",
-    icon: <LayersIcon />,
+    segment: "messages",
+    title: "Messages",
+    icon: <MessageIcon />,
+    route: routes.messenger.replace(":receiverId", "1"),
   },
 ];
 
 function Sidebar() {
   const [openSegments, setOpenSegments] = useState({});
   const [isSelected, setIsSelected] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  // Handle the toggle of a segment (open/close) or navigate if no children
   const handleOpen = (nav) => {
     if (nav?.children && nav.children.length > 0) {
       setOpenSegments((prevOpenSegments) => ({
@@ -64,7 +61,8 @@ function Sidebar() {
         setIsSelected(nav.segment);
       }
     } else {
-      console.log(nav.segment);
+      setIsSelected(nav.segment);
+      navigate(nav.route);
     }
   };
 
@@ -76,52 +74,66 @@ function Sidebar() {
         width: "64px",
       }}
     >
-      {NAVIGATION.map((nav) => (
-        <Box key={nav.segment}>
-          <ListItemButton
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              height: "64px",
-            }}
-            selected={isSelected === nav.segment}
-            onClick={() => handleOpen(nav)}
-          >
-            <ListItemIcon
+      {NAVIGATION.map((nav) => {
+        const isActive = location.pathname.startsWith(nav.route); // Check if the current route is active
+
+        return (
+          <Box key={nav.segment}>
+            <ListItemButton
               sx={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                cursor: "pointer",
+                height: "64px",
+                // backgroundColor: isActive ? "primary.light" : "inherit", // Highlight active item
+                "&:hover": {
+                  backgroundColor: isActive
+                    ? "primary.light"
+                    : "primary.lighter", // Hover effect
+                },
               }}
+              selected={isSelected === nav.segment} // Mark as selected
+              onClick={() => handleOpen(nav)} // Handle item click
             >
-              {nav.icon}
-            </ListItemIcon>
-          </ListItemButton>
-          {nav.children && (
-            <Collapse
-              in={openSegments[nav.segment]}
-              timeout="auto"
-              unmountOnExit
-            >
-              <List component="div" disablePadding>
-                {nav.children.map((child) => (
-                  <ListItemButton
-                    key={child.segment}
-                    sx={{
-                      borderLeft: "1px solid",
-                      borderColor: "primary.dark",
-                    }}
-                  >
-                    <ListItemIcon>{child.icon}</ListItemIcon>
-                  </ListItemButton>
-                ))}
-              </List>
-            </Collapse>
-          )}
-        </Box>
-      ))}
+              <ListItemIcon
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: isActive ? "primary.main" : "text.primary", // Change icon color based on active state
+                }}
+              >
+                {nav.icon}
+              </ListItemIcon>
+            </ListItemButton>
+
+            {/* Render collapse for items with children */}
+            {nav.children && (
+              <Collapse
+                in={openSegments[nav.segment]} // Control the collapse state
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  {nav.children.map((child) => (
+                    <ListItemButton
+                      key={child.segment}
+                      sx={{
+                        borderLeft: "1px solid",
+                        borderColor: "primary.dark",
+                      }}
+                      onClick={() => navigate(`/${child.segment}`)} // Navigate to child route
+                    >
+                      <ListItemIcon>{child.icon}</ListItemIcon>
+                    </ListItemButton>
+                  ))}
+                </List>
+              </Collapse>
+            )}
+          </Box>
+        );
+      })}
     </List>
   );
 }
