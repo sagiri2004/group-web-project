@@ -24,7 +24,6 @@ function SignUpForm({ handleToggle }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
@@ -45,7 +44,6 @@ function SignUpForm({ handleToggle }) {
     const user = {
       username: username,
       password: password,
-      email: email,
     };
 
     // Kiểm tra xem mật khẩu và xác nhận mật khẩu có khớp không
@@ -58,7 +56,7 @@ function SignUpForm({ handleToggle }) {
       const result = await dispatch(registerUser(user)); // Gọi dispatch trực tiếp ở đây
 
       if (result) {
-        navigate("/");
+        navigate("/login");
       }
 
       console.log("Register result:", result);
@@ -100,26 +98,6 @@ function SignUpForm({ handleToggle }) {
             variant="outlined"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            sx={{
-              "& .MuiInputLabel-root": {
-                color: "white", // Đổi màu label thành trắng
-              },
-              "& .MuiOutlinedInput-root": {
-                color: "white", // Đổi màu chữ bên trong input thành trắng
-                "& fieldset": {
-                  borderColor: "white", // Đổi màu viền input thành trắng
-                },
-              },
-            }}
-          />
-        </FormControl>
-        <FormControl sx={{ width: "100%" }} variant="outlined">
-          <TextField
-            id="outlined-basic-email"
-            label="Email"
-            variant="outlined"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             sx={{
               "& .MuiInputLabel-root": {
                 color: "white", // Đổi màu label thành trắng

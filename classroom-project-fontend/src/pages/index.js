@@ -7,3 +7,4 @@ export { default as FlashCardPage } from "./FlashCardPage";
 export { default as EditFlashcardPage } from "./EditFlashcardPage";
 export { default as MessengerPage } from "./MessengerPage";
 export { default as MyFlashcardSetPage } from "./MyFlashcardSetPage";
+export { default as AboutPage } from "./AboutPage";

@@ -37,6 +37,11 @@ function HomePage() {
   };
 
   useEffect(() => {
+    //neu nguoi dung chua dang nhap thi chuyen huong ve trang trang about
+    if (!localStorage.getItem("token")) {
+      navigate("/about");
+    }
+
     apiClient
       .get("/user/me")
       .then((response) => {
