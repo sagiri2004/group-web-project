@@ -1,6 +1,25 @@
 const db = require("~/models");
 const { Op } = require("sequelize");
 
+function formatRelativeTime(createdAt) {
+  const now = new Date();
+  const postTime = new Date(createdAt);
+  const diffInMs = now - postTime;
+  const diffInMinutes = Math.floor(diffInMs / 60000);
+
+  if (diffInMinutes < 1) {
+    return "Just now";
+  } else if (diffInMinutes < 60) {
+    return `${diffInMinutes} minutes ago`;
+  } else if (diffInMinutes < 1440) {
+    const hours = Math.floor(diffInMinutes / 60);
+    return `${hours} hours ago`;
+  } else {
+    const days = Math.floor(diffInMinutes / 1440);
+    return `${days} days ago`;
+  }
+}
+
 // fix
 async function joinClassroom(user, classroomId) {
   const classroom = await db.Classroom.findByPk(classroomId);
@@ -330,8 +349,6 @@ async function listAssignment(user, classroomId) {
 async function submitAssignment(user, assignmentId, content) {
   const assignment = await db.Assignment.findByPk(assignmentId);
 
-  console.log(assignment);
-
   if (!assignment) {
     throw new Error("Assignment not found");
   }
@@ -401,8 +418,6 @@ async function getAssignment(user, assignmentId) {
     console.error("Error finding user assignment:", error);
     throw new Error("Error finding user assignment");
   }
-
-  // console.log(userSubmission);
 
   const data = {
     id: assignment.id,
@@ -510,7 +525,7 @@ async function createPost(user, classroomId, title, content) {
   }
 
   const post = await db.Post.create({
-    classId: classroomId,
+    classroomId,
     userId: user.id,
     title,
     content,
@@ -525,12 +540,12 @@ async function createPost(user, classroomId, title, content) {
 async function listPost(user, classroomId) {
   const posts = await db.Post.findAll({
     where: {
-      classId: classroomId,
+      classroomId,
     },
     include: db.User,
   });
 
-  const data = posts.map((item) => {
+  const data1 = posts.map((item) => {
     const { id, title, content, createdAt, User } = item;
     return {
       id,
@@ -543,6 +558,31 @@ async function listPost(user, classroomId) {
         name: User.name,
         avatar: User.avatar,
       },
+    };
+  });
+
+  // chuyen ve dang
+  //   <PostDisplayComponent
+  //   title="Check out this amazing view!"
+  //   content="<p>This place is so beautiful. Highly recommend visiting!</p>"
+  //   avatar="https://via.placeholder.com/150"
+  //   name="John Doe"
+  //   username="johndoe"
+  //   time="2h"
+  // />
+
+  const data = data1.map((item) => {
+    const { id, title, content, createdAt, User } = item;
+    const time = formatRelativeTime(createdAt); // Thời gian tương đối
+    return {
+      id,
+      title,
+      content,
+      createdAt,
+      username: User.username,
+      name: User.name,
+      avatar: User.avatar,
+      time, // Thời gian đã format
     };
   });
 
@@ -622,6 +662,25 @@ async function getClassroom(user, classroomId) {
   };
 }
 
+async function getAllClassroom(user) {
+  const userClassrooms = await db.UserClassroom.findAll({
+    where: {
+      userId: user.id,
+    },
+    include: db.Classroom,
+  });
+
+  const classrooms = userClassrooms.map((item) => {
+    const { id, name, description, imageUrl } = item.Classroom;
+    return { id, name, description, imageUrl };
+  });
+
+  return {
+    data: classrooms,
+    message: "Get all classroom successfully",
+  };
+}
+
 module.exports = {
   joinClassroom,
   leaveClassroom,
@@ -641,4 +700,5 @@ module.exports = {
   deletePost,
   checkIsAdmin,
   getClassroom,
+  getAllClassroom,
 };

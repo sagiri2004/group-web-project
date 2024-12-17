@@ -98,4 +98,7 @@ router.get(
   ClassroomController.getClassroom
 );
 
+// get all classroom co lien quan den user
+router.get("/", authenticateToken, ClassroomController.getAllClassroom);
+
 module.exports = router;

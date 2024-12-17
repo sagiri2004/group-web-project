@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // Define associations here
       Post.belongsTo(models.Classroom, {
-        foreignKey: "classId",
+        foreignKey: "classroomId",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      classId: {
+      classroomId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
           key: "id",
         },
       },
-      text: {
+      content: {
         type: DataTypes.TEXT,
         allowNull: true,
       },

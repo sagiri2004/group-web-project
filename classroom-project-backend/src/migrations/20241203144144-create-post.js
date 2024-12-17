@@ -9,15 +9,9 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
       },
-      userId: {
-        type: Sequelize.INTEGER,
+      title: {
+        type: Sequelize.STRING,
         allowNull: false,
-        references: {
-          model: "Users",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
       },
       classroomId: {
         type: Sequelize.INTEGER,
@@ -29,9 +23,19 @@ module.exports = {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
-      text: {
-        type: Sequelize.TEXT,
+      userId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
+        references: {
+          model: "Users",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      },
+      content: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       createdAt: {
         type: Sequelize.DATE,

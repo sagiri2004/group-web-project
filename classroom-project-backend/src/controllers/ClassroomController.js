@@ -315,6 +315,22 @@ class ClassroomController {
       });
     }
   }
+
+  // get all classroom co lien quan den user
+  async getAllClassroom(req, res) {
+    try {
+      const user = req.user;
+
+      const result = await classroomService.getAllClassroom(user);
+
+      res.json(result);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  }
 }
 
 module.exports = new ClassroomController();
