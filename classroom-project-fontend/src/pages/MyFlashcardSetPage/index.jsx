@@ -2,6 +2,9 @@ import apiClient from "~/api/apiClient";
 import { useEffect, useState } from "react";
 import { Box, Typography, IconButton, Tooltip, Button } from "@mui/material";
 
+// su dung react-router-dom de chuyen trang
+import { useNavigate } from "react-router-dom";
+
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import FlashcardSet from "./FlashcardSet";
@@ -13,6 +16,7 @@ function MyFlashcardSetPage() {
 
   const handleOpen = () => setDialogOpen(true);
   const handleClose = () => setDialogOpen(false);
+  const navigate = useNavigate();
 
   const handleCreateFlashcard = (newFlashcardSet) => {
     apiClient
@@ -41,7 +45,9 @@ function MyFlashcardSetPage() {
   }, []);
 
   const handleClickFlashcardSet = (id) => {
-    window.location.href = `/flashcards/${id}`;
+    // window.location.href = `/flashcards/${id}`;
+    // su dung useNavigate de chuyen trang
+    navigate(`/flashcards/${id}`);
     console.log("Clicked flashcard set with id:", id);
   };
 
