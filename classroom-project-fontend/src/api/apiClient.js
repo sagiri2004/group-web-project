@@ -9,10 +9,10 @@ const apiClient = axios.create({
 });
 
 // lay ra token tu localStorage
-const token = localStorage.getItem("token");
 
 // seting axios interceptor
 apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
   console.log("Token:", token);
   if (token) {
     config.headers
