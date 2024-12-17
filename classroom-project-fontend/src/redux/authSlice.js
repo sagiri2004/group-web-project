@@ -7,8 +7,7 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await apiClient.post("/auth/login", user);
       console.log("response", response);
-      // localStorage.setItem("token", action.payload?.token);
-      return response?.data.data;
+      return response?.data.data; // Trả về dữ liệu đăng nhập
     } catch (error) {
       console.error("Login error:", error);
       return rejectWithValue(error.response?.data.data || "Login failed");
@@ -35,6 +34,7 @@ export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { rejectWithValue }) => {
     try {
+      // Call API để đăng xuất nếu cần
       // await apiClient.post("/auth/logout");
     } catch (error) {
       console.error("Logout error:", error);
@@ -75,7 +75,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Login user
+      // Xử lý Login
       .addCase(loginUser.pending, (state) => {
         state.login.loading = true;
         state.login.error = null;
@@ -83,8 +83,10 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.login.loading = false;
         state.login.token = action.payload?.token;
-        // luu token vao localStorage
+
+        // Lưu token vào localStorage
         localStorage.setItem("token", action.payload?.token);
+
         console.log("action.payload?.user", action.payload);
         state.login.currentUser = action.payload?.user;
         state.login.error = null;
@@ -94,16 +96,21 @@ const authSlice = createSlice({
         state.login.error = action.payload || "Login failed";
       })
 
-      // Logout user
+      // Xử lý Logout
       .addCase(logoutUser.pending, (state) => {
         state.logout.loading = true;
         state.logout.error = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.logout.loading = false;
+
+        // Xóa thông tin người dùng và token
         state.login.currentUser = null;
         state.login.token = null;
+
+        // Xóa token khỏi localStorage
         localStorage.removeItem("token");
+
         state.logout.error = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
@@ -111,7 +118,7 @@ const authSlice = createSlice({
         state.logout.error = action.payload || "Logout failed";
       })
 
-      // Register user
+      // Xử lý Register
       .addCase(registerUser.pending, (state) => {
         state.register.loading = true;
         state.register.error = null;
