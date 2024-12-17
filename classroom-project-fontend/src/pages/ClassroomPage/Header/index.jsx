@@ -40,7 +40,7 @@ function Header({ page, isAdmin }) {
         bgcolor: "bg-header",
         height: (theme) => theme.custom.headerHeight,
         width: "100%",
-        padding: 2,
+        // padding: 2,
         position: "fixed",
         zIndex: 1000,
         py: 1,

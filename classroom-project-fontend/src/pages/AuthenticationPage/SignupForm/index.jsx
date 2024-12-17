@@ -28,6 +28,7 @@ function SignUpForm({ handleToggle }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // Đặt useDispatch ở đây
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -46,14 +47,15 @@ function SignUpForm({ handleToggle }) {
       password: password,
       email: email,
     };
+
+    // Kiểm tra xem mật khẩu và xác nhận mật khẩu có khớp không
     if (password !== confirmPassword) {
       console.log("Passwords do not match");
       return;
     }
 
     try {
-      const dispatch = useDispatch();
-      const result = await dispatch(registerUser(user));
+      const result = await dispatch(registerUser(user)); // Gọi dispatch trực tiếp ở đây
 
       if (result) {
         navigate("/");
@@ -81,7 +83,13 @@ function SignUpForm({ handleToggle }) {
         }}
       >
         <Box>
-          <Typography variant="h5" component="h1" align="center" gutterBottom>
+          <Typography
+            variant="h5"
+            component="h1"
+            align="center"
+            gutterBottom
+            color="white" // Đổi màu chữ thành trắng
+          >
             Create an account
           </Typography>
         </Box>
@@ -92,6 +100,17 @@ function SignUpForm({ handleToggle }) {
             variant="outlined"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            sx={{
+              "& .MuiInputLabel-root": {
+                color: "white", // Đổi màu label thành trắng
+              },
+              "& .MuiOutlinedInput-root": {
+                color: "white", // Đổi màu chữ bên trong input thành trắng
+                "& fieldset": {
+                  borderColor: "white", // Đổi màu viền input thành trắng
+                },
+              },
+            }}
           />
         </FormControl>
         <FormControl sx={{ width: "100%" }} variant="outlined">
@@ -101,10 +120,24 @@ function SignUpForm({ handleToggle }) {
             variant="outlined"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            sx={{
+              "& .MuiInputLabel-root": {
+                color: "white", // Đổi màu label thành trắng
+              },
+              "& .MuiOutlinedInput-root": {
+                color: "white", // Đổi màu chữ bên trong input thành trắng
+                "& fieldset": {
+                  borderColor: "white", // Đổi màu viền input thành trắng
+                },
+              },
+            }}
           />
         </FormControl>
         <FormControl sx={{ width: "100%" }} variant="outlined">
-          <InputLabel htmlFor="outlined-adornment-password">
+          <InputLabel
+            htmlFor="outlined-adornment-password"
+            sx={{ color: "white" }}
+          >
             Password
           </InputLabel>
           <OutlinedInput
@@ -126,10 +159,21 @@ function SignUpForm({ handleToggle }) {
               </InputAdornment>
             }
             label="Password"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                color: "white", // Đổi màu chữ bên trong input thành trắng
+                "& fieldset": {
+                  borderColor: "white", // Đổi màu viền input thành trắng
+                },
+              },
+            }}
           />
         </FormControl>
         <FormControl sx={{ width: "100%" }} variant="outlined">
-          <InputLabel htmlFor="outlined-adornment-confirm-password">
+          <InputLabel
+            htmlFor="outlined-adornment-confirm-password"
+            sx={{ color: "white" }}
+          >
             Confirm Password
           </InputLabel>
           <OutlinedInput
@@ -151,20 +195,30 @@ function SignUpForm({ handleToggle }) {
               </InputAdornment>
             }
             label="Confirm Password"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                color: "white", // Đổi màu chữ bên trong input thành trắng
+                "& fieldset": {
+                  borderColor: "white", // Đổi màu viền input thành trắng
+                },
+              },
+            }}
           />
         </FormControl>
         <FormControlLabel
           control={<Checkbox value="terms" color="primary" />}
           label="I agree to the Terms and Conditions"
+          sx={{ color: "white" }} // Đổi màu chữ checkbox thành trắng
         />
         <Box>
-          <Typography variant="body2" align="center">
+          <Typography variant="body2" align="center" color="white">
             Already have an account?{" "}
             <Button
               underline="hover"
               onClick={handleToggle}
               sx={{
                 textTransform: "none",
+                color: "white", // Đổi màu chữ nút đăng nhập thành trắng
               }}
             >
               Sign in
@@ -174,7 +228,12 @@ function SignUpForm({ handleToggle }) {
         <Button
           type="submit"
           variant="contained"
-          sx={{ width: "100%", mt: 2, textTransform: "none" }}
+          sx={{
+            width: "100%",
+            mt: 2,
+            textTransform: "none",
+            backgroundColor: "#1976d2", // Màu nền nút
+          }}
         >
           Sign Up
         </Button>

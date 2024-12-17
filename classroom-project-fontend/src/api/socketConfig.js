@@ -4,7 +4,14 @@ import { io } from "socket.io-client";
 const token = localStorage.getItem("token");
 
 // Kết nối đến server Socket.IO
-const socket = io("https://group-web-project-3.onrender.com", {
+// const socket = io("https://group-web-project-3.onrender.com", {
+//   transports: ["websocket"],
+//   query: {
+//     token: token,
+//   },
+// });
+
+const socket = io("http://localhost:3000", {
   transports: ["websocket"],
   query: {
     token: token,

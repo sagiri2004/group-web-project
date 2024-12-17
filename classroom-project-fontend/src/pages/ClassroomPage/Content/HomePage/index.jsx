@@ -1,67 +1,86 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { Box, CircularProgress, Button } from "@mui/material";
 import Footer from "../Footer";
 import PostDisplayComponent from "./PostDisplayComponent";
+import apiClient from "~/api/apiClient";
+import { useParams } from "react-router-dom";
 
-const initialPosts = [
-  {
-    title: "Post 1",
-    value: "This is the content of post 1",
-    avatar: "https://material-ui.com/static/images/avatar/1.jpg",
-    name: "User 1",
-  },
-  {
-    title: "Post 2",
-    value: "This is the content of post 2",
-    avatar: "https://material-ui.com/static/images/avatar/2.jpg",
-    name: "User 2",
-  },
-  {
-    title: "Post 3",
-    value: "This is the content of post 3",
-    avatar: "https://material-ui.com/static/images/avatar/3.jpg",
-    name: "User 3",
-  },
-  {
-    title: "Post 4",
-    value: "This is the content of post 4",
-    avatar: "https://material-ui.com/static/images/avatar/4.jpg",
-    name: "User 4",
-  },
-];
+// const initialPosts = [
+//   {
+//     title: "Post 1",
+//     value: "This is the content of post 1",
+//     avatar: "https://material-ui.com/static/images/avatar/1.jpg",
+//     name: "User 1",
+//   },
+//   {
+//     title: "Post 2",
+//     value: "This is the content of post 2",
+//     avatar: "https://material-ui.com/static/images/avatar/2.jpg",
+//     name: "User 2",
+//   },
+//   {
+//     title: "Post 3",
+//     value: "This is the content of post 3",
+//     avatar: "https://material-ui.com/static/images/avatar/3.jpg",
+//     name: "User 3",
+//   },
+//   {
+//     title: "Post 4",
+//     value: "This is the content of post 4",
+//     avatar: "https://material-ui.com/static/images/avatar/4.jpg",
+//     name: "User 4",
+//   },
+// ];
 
 function HomePage() {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef(null);
   const handleScroll = () => {
-    if (containerRef.current.scrollTop === 0 && !isLoading) {
-      setIsLoading(true);
-
-      setTimeout(() => {
-        const newPosts = [
-          {
-            title: `Post ${posts.length + 1}`,
-            value: `This is the content of post ${posts.length + 1}`,
-            avatar: `https://material-ui.com/static/images/avatar/${
-              (posts.length % 4) + 1
-            }.jpg`,
-            name: `User ${posts.length + 1}`,
-          },
-          {
-            title: `Post ${posts.length + 2}`,
-            value: `This is the content of post ${posts.length + 2}`,
-            avatar: `https://material-ui.com/static/images/avatar/${
-              ((posts.length + 1) % 4) + 1
-            }.jpg`,
-            name: `User ${posts.length + 2}`,
-          },
-        ];
-        setPosts((prevPosts) => [...prevPosts, ...newPosts]); // Thêm bài viết mới
-        setIsLoading(false); // Tắt loading
-      }, 2000);
-    }
+    // if (containerRef.current.scrollTop === 0 && !isLoading) {
+    //   setIsLoading(true);
+    //   setTimeout(() => {
+    //     const newPosts = [
+    //       {
+    //         title: `Post ${posts.length + 1}`,
+    //         value: `This is the content of post ${posts.length + 1}`,
+    //         avatar: `https://material-ui.com/static/images/avatar/${
+    //           (posts.length % 4) + 1
+    //         }.jpg`,
+    //         name: `User ${posts.length + 1}`,
+    //       },
+    //       {
+    //         title: `Post ${posts.length + 2}`,
+    //         value: `This is the content of post ${posts.length + 2}`,
+    //         avatar: `https://material-ui.com/static/images/avatar/${
+    //           ((posts.length + 1) % 4) + 1
+    //         }.jpg`,
+    //         name: `User ${posts.length + 2}`,
+    //       },
+    //     ];
+    //     setPosts((prevPosts) => [...prevPosts, ...newPosts]); // Thêm bài viết mới
+    //     setIsLoading(false); // Tắt loading
+    //   }, 2000);
+    // }
   };
+
+  // lay ra id cua lop hoc
+  const { classroomId } = useParams();
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await apiClient.get(
+          "/classroom/list-post/" + classroomId
+        );
+        setPosts(response.data.data);
+      } catch (error) {
+        console.error("Failed to fetch posts: ", error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   // Cuộn xuống cuối container
   const scrollToBottom = () => {
@@ -131,7 +150,12 @@ function HomePage() {
         >
           {/* Hiển thị danh sách bài viết */}
           {posts.slice().map((post, index) => (
-            <PostDisplayComponent key={index} {...post} />
+            <PostDisplayComponent
+              posts={posts}
+              setPosts={setPosts}
+              key={index}
+              {...post}
+            />
           ))}
         </Box>
         {/* Nút Scroll to Bottom */}
@@ -148,7 +172,7 @@ function HomePage() {
           </Button>
         </Box>
 
-        <Footer />
+        <Footer posts={posts} setPost={setPosts} />
       </Box>
     </Box>
   );

@@ -2,15 +2,40 @@ import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Box, Button, TextField } from "@mui/material";
+import apiClient from "~/api/apiClient";
+import { useParams } from "react-router-dom";
 
-function PostComponent({ onClose }) {
+function PostComponent({ onClose, posts = [], setPosts }) {
+  // Default posts to an empty array
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const handleSave = () => {
+  const { classroomId } = useParams();
+
+  const handleSave = async () => {
     console.log("Title and content saved:", { title, content });
+
+    const data = await apiClient.post("/classroom/create-post", {
+      title,
+      content,
+      classroomId,
+    });
+
+    console.log("post 1", posts);
+    console.log("Data:", data.data);
+
+    // Make sure posts is an array before spreading
+    const newPosts = Array.isArray(posts)
+      ? [...posts, data.data.post]
+      : [data.data.post];
+    console.log("newPosts", newPosts);
+
     if (onClose) {
       onClose();
+    }
+
+    if (setPosts) {
+      setPosts(newPosts);
     }
   };
 

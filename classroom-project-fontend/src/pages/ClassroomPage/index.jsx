@@ -60,7 +60,7 @@ function ClassroomPage() {
     <Box
       sx={{
         display: "flex",
-        minHeight: "100vh",
+        // minHeight: "100vh",
       }}
     >
       <Sidebar classroom={classroom} />

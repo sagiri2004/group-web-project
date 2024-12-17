@@ -17,6 +17,7 @@ import {
   ListItemText,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const NAVIGATION = [
   {
@@ -56,6 +57,11 @@ const NAVIGATION = [
 function Sidebar({ classroom }) {
   const [openSegments, setOpenSegments] = useState({});
   const [isSelected, setIsSelected] = useState("");
+  const navigate = useNavigate();
+
+  const handleNavigationClick = (segment) => {
+    navigate(`/classrooms`);
+  };
 
   const handleOpen = (nav) => {
     if (nav?.children && nav.children.length > 0) {
@@ -99,6 +105,7 @@ function Sidebar({ classroom }) {
             textTransform: "none",
             width: "fit-content",
           }}
+          onClick={handleNavigationClick}
         >
           Back to all classrooms
         </Button>

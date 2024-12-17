@@ -2,12 +2,15 @@ import { Box, Button } from "@mui/material";
 import PostComponent from "../HomePage/PostComponent";
 import { useState } from "react";
 
-function Footer() {
+function Footer(posts, setPosts) {
   const [isPostComponentOpen, setIsPostComponentOpen] = useState(false);
   const handleCreatePost = () => {
     setIsPostComponentOpen(true);
     window.scrollTo(0, document.body.scrollHeight);
   };
+
+  console.log("Posts:", posts);
+  console.log("SetPosts:", setPosts);
   return (
     <Box
       sx={{
@@ -24,7 +27,11 @@ function Footer() {
         </Button>
       )}
       {isPostComponentOpen && (
-        <PostComponent onClose={() => setIsPostComponentOpen(false)} />
+        <PostComponent
+          posts={posts}
+          setPosts={setPosts}
+          onClose={() => setIsPostComponentOpen(false)}
+        />
       )}
     </Box>
   );

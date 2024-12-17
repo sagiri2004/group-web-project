@@ -88,10 +88,22 @@ function LoginForm({ handleToggle }) {
         }}
       >
         <Box>
-          <Typography variant="h5" component="h1" align="center" gutterBottom>
+          <Typography
+            variant="h5"
+            component="h1"
+            align="center"
+            gutterBottom
+            color="white" // Đổi màu chữ thành trắng
+          >
             Hello,
           </Typography>
-          <Typography variant="h5" component="h1" align="center" gutterBottom>
+          <Typography
+            variant="h5"
+            component="h1"
+            align="center"
+            gutterBottom
+            color="white" // Đổi màu chữ thành trắng
+          >
             Welcome!
           </Typography>
         </Box>
@@ -102,6 +114,17 @@ function LoginForm({ handleToggle }) {
             variant="outlined"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            sx={{
+              "& .MuiInputLabel-root": {
+                color: "white", // Đổi màu label thành trắng
+              },
+              "& .MuiOutlinedInput-root": {
+                color: "white", // Đổi màu chữ bên trong input thành trắng
+                "& fieldset": {
+                  borderColor: "white", // Đổi màu viền input thành trắng
+                },
+              },
+            }}
           />
         </FormControl>
         <Box
@@ -115,7 +138,10 @@ function LoginForm({ handleToggle }) {
             component="button"
             onClick={handleClickOpen}
             variant="body2"
-            sx={{ alignSelf: "baseline" }}
+            sx={{
+              alignSelf: "baseline",
+              color: "white", // Đổi màu chữ liên kết thành trắng
+            }}
             inert={openForgotPassword ? "true" : undefined}
           >
             Forgot your password?
@@ -123,7 +149,10 @@ function LoginForm({ handleToggle }) {
         </Box>
 
         <FormControl sx={{ width: "100%" }} variant="outlined">
-          <InputLabel htmlFor="outlined-adornment-password">
+          <InputLabel
+            htmlFor="outlined-adornment-password"
+            sx={{ color: "white" }}
+          >
             Password
           </InputLabel>
           <OutlinedInput
@@ -145,20 +174,30 @@ function LoginForm({ handleToggle }) {
               </InputAdornment>
             }
             label="Password"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                color: "white", // Đổi màu chữ bên trong input thành trắng
+                "& fieldset": {
+                  borderColor: "white", // Đổi màu viền input thành trắng
+                },
+              },
+            }}
           />
         </FormControl>
         <FormControlLabel
           control={<Checkbox value="remember" color="primary" />}
           label="Remember me"
+          sx={{ color: "white" }} // Đổi màu chữ checkbox thành trắng
         />
         <Box>
-          <Typography variant="body2" align="center">
+          <Typography variant="body2" align="center" color="white">
             Don't have an account?{" "}
             <Button
               underline="hover"
               onClick={handleToggle}
               sx={{
                 textTransform: "none",
+                color: "white", // Đổi màu chữ nút đăng ký thành trắng
               }}
             >
               Sign up
@@ -168,7 +207,12 @@ function LoginForm({ handleToggle }) {
         <Button
           type="submit"
           variant="contained"
-          sx={{ width: "100%", mt: 2, textTransform: "none" }}
+          sx={{
+            width: "100%",
+            mt: 2,
+            textTransform: "none",
+            backgroundColor: "#1976d2", // Màu nền nút
+          }}
         >
           Sign in
         </Button>
