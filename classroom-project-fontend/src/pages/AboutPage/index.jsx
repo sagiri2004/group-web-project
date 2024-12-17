@@ -6,54 +6,133 @@ import {
   Container,
   Grid,
   Paper,
-  Avatar,
+  SvgIcon,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import LogoIcon from "~/assets/images/logo.svg?react";
 
 const AboutPage = () => {
   const navigate = useNavigate();
 
   const handleJoinNow = () => {
-    navigate("/login"); // Chuyển về trang login
+    navigate("/login");
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#F4F4F9", paddingY: 4 }}>
-      {/* Header với Logo và Tên Dự Án */}
-      <Container maxWidth="lg" sx={{ mb: 4 }}>
-        <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
-          <Avatar
-            src="https://via.placeholder.com/100" // Thay logo phù hợp
-            alt="Logo"
-            sx={{ width: 60, height: 60 }}
-          />
-          <Typography variant="h4" sx={{ fontWeight: "bold", color: "#333" }}>
-            Dự án Quản Lý Lớp Học
-          </Typography>
-        </Box>
-      </Container>
-
-      {/* Nội dung Chính */}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #B8C5E6, #C4D0EC)",
+        paddingY: 4,
+      }}
+    >
       <Container maxWidth="lg">
         <Grid container spacing={4} alignItems="center">
           {/* Phần Trái */}
           <Grid item xs={12} md={6}>
-            <Typography variant="h3" gutterBottom sx={{ fontWeight: "bold" }}>
+            {/* Logo và tên */}
+            <Box
+              display="flex"
+              justifyContent="flex-start"
+              alignItems="center"
+              mb={2}
+            >
+              <SvgIcon
+                component={LogoIcon}
+                inheritViewBox
+                sx={{ height: "40px", width: "auto" }}
+              />
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: "700",
+                  color: "#2D58FF",
+                  fontSize: "1.5rem",
+                }}
+              >
+                Sagiri
+              </Typography>
+            </Box>
+
+            {/* Tiêu đề chính */}
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: "800 !important",
+                mb: 2,
+                color: "#333333",
+                fontSize: "42px !important",
+                lineHeight: "60px !important",
+                letterSpacing: ".1px !important",
+                textAlign: "left", // Căn lề trái
+              }}
+            >
               Một cách hiệu quả để quản lý lớp học
             </Typography>
-            <Typography variant="body1" paragraph>
-              Cung cấp công cụ giảng dạy hiện đại với các tính năng như giao bài
-              tập, thi trực tuyến, tổ chức lớp học, và khai thác học liệu.
-            </Typography>
+
+            {/* Nút CTA */}
             <Button
               variant="contained"
-              color="primary"
               size="large"
               onClick={handleJoinNow}
-              sx={{ borderRadius: "30px", textTransform: "none" }}
+              sx={{
+                borderRadius: "24px",
+                backgroundColor: "#2D58FF",
+                paddingX: 4,
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "22px",
+                mb: 4,
+                height: "72px",
+                minWidth: "200px",
+                padding: "24px 52px",
+                "&:hover": { backgroundColor: "#1E40AF" },
+              }}
             >
               Tham gia ngay
             </Button>
+
+            {/* Tính năng */}
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 2,
+                justifyContent: "flex-start",
+              }}
+            >
+              {[
+                { title: "Cung cấp tài nguyên cho học sinh", icon: "📥" },
+                { title: "Khai thác học liệu", icon: "🖥️" },
+                { title: "Giao bài tập", icon: "✏️" },
+                { title: "Thi trực tuyến", icon: "🗂️" },
+                { title: "Tổ chức lớp học trực tuyến", icon: "💻" },
+                { title: "Tạo nhiệm vụ học tập", icon: "🔮" },
+              ].map((feature, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "12px 16px",
+                    borderRadius: "100px",
+                    backgroundColor: "#E8EAF6", // Màu nền cho tính năng
+                    width: "fit-content",
+                    margin: "8px 8px 0px 0px",
+                  }}
+                >
+                  <Typography fontSize="20px" sx={{ marginRight: "8px" }}>
+                    {feature.icon}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, color: "#333", fontSize: "1rem" }}
+                  >
+                    {feature.title}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
           </Grid>
 
           {/* Phần Phải */}
@@ -65,53 +144,18 @@ const AboutPage = () => {
                 overflow: "hidden",
                 display: "flex",
                 justifyContent: "center",
+                height: "100%",
+                boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.2)",
               }}
             >
               <img
-                src="https://via.placeholder.com/400x400" // Thay ảnh phù hợp
-                alt="Teacher"
-                style={{ width: "100%", maxWidth: "400px" }}
+                src="https://res.cloudinary.com/dkidy104q/image/upload/v1734462915/xdnfp3igxqg7xvtwvaxr.jpg"
+                alt="Elaina"
+                style={{ width: "100%", maxWidth: "600px", height: "auto" }}
               />
             </Box>
           </Grid>
         </Grid>
-
-        {/* Tính Năng Nổi Bật */}
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h4" align="center" gutterBottom>
-            Tính năng nổi bật
-          </Typography>
-          <Grid container spacing={3} justifyContent="center">
-            {[
-              { title: "Cung cấp tài nguyên cho học sinh", icon: "📚" },
-              { title: "Khai thác học liệu", icon: "🔍" },
-              { title: "Giao bài tập", icon: "📝" },
-              { title: "Tổ chức lớp học trực tuyến", icon: "🎥" },
-              { title: "Tạo nhiệm vụ học tập", icon: "✅" },
-              { title: "Chat realtime với giáo viên", icon: "💬" },
-              { title: "Flashcard", icon: "🃏" },
-            ].map((feature, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Paper
-                  elevation={3}
-                  sx={{
-                    p: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 2,
-                    borderRadius: "15px",
-                    backgroundColor: "#FFFFFF",
-                  }}
-                >
-                  <Avatar sx={{ bgcolor: "#2196F3", color: "white" }}>
-                    {feature.icon}
-                  </Avatar>
-                  <Typography variant="subtitle1">{feature.title}</Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
       </Container>
     </Box>
   );
