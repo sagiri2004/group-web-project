@@ -21,7 +21,7 @@ import { RiAttachment2 } from "react-icons/ri";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useTheme } from "@mui/material/styles";
-
+import { useNavigate } from "react-router-dom";
 import socket from "~/api/socketConfig";
 import apiClient from "~/api/apiClient";
 import { calculateTimeSince } from "~/utils/timeUtils";
@@ -81,7 +81,7 @@ const InputSection = styled(Box)({
 const ChatApp = () => {
   const [messages, setMessages] = useState([]);
   const theme = useTheme();
-
+  const navigate = useNavigate();
   const [contacts, setContacts] = useState([]);
 
   const [newMessage, setNewMessage] = useState("");
@@ -103,6 +103,7 @@ const ChatApp = () => {
     const getConversations = async () => {
       try {
         const { data } = await apiClient.get("/messages");
+        console.log("Conversations:", data);
         setContacts(data);
       } catch (error) {
         console.error("Error getting conversations:", error);
@@ -164,6 +165,7 @@ const ChatApp = () => {
     setCurrentConversation(conversationId);
     socket.emit("leave_conversation", conversationId);
     setReceiverId(conversationId);
+    scrollToBottom();
   };
 
   useEffect(() => {

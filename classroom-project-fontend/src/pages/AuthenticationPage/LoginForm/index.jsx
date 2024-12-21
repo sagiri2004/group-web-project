@@ -15,6 +15,9 @@ import {
   FormControlLabel,
   Checkbox,
   Button,
+  Snackbar,
+  Alert,
+  LinearProgress,
 } from "@mui/material";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -25,55 +28,76 @@ import ForgotPassword from "./ForgotPassword";
 function LoginForm({ handleToggle }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
   const [showPassword, setShowPassword] = useState(false);
   const [openForgotPassword, setOpenForgotPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleClickOpen = (event) => {
     event.preventDefault();
     setOpenForgotPassword(true);
   };
-  const handleClose = (event) => {
+
+  const handleCloseForgotPassword = (event) => {
     event.preventDefault();
     setOpenForgotPassword(false);
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
-
-  const handleMouseUpPassword = (event) => {
-    event.preventDefault();
+  const handleSnackbarClose = () => {
+    setSnackbar({ open: false, message: "", type: "success" });
   };
 
   const handleLogin = async (event) => {
     event.preventDefault();
     const user = {
-      username: username,
-      password: password,
+      username,
+      password,
     };
+
+    setIsLoading(true); // Start the loading indicator
 
     try {
       const result = await dispatch(loginUser(user));
 
-      console.log("Login result:", result);
-
-      if (loginUser.fulfilled.match(result)) {
+      if (result.payload.success) {
+        setSnackbar({
+          open: true,
+          message: result.payload?.message || "Login successful",
+          type: "success",
+        });
         navigate("/");
       } else {
-        console.error("Failed to login:", result.payload);
+        setSnackbar({
+          open: true,
+          message: result.payload?.message || "Login failed",
+          type: "error",
+        });
       }
     } catch (error) {
+      setSnackbar({
+        open: true,
+        message: "An unexpected error occurred",
+        type: "error",
+      });
       console.error("Failed to login:", error);
+    } finally {
+      setIsLoading(false); // Stop the loading indicator
     }
   };
 
   return (
     <Box flex="1">
+      {isLoading && <LinearProgress color="secondary" />}
       <Box
         component="form"
         onSubmit={handleLogin}
@@ -93,7 +117,7 @@ function LoginForm({ handleToggle }) {
             component="h1"
             align="center"
             gutterBottom
-            color="white" // Đổi màu chữ thành trắng
+            color="white"
           >
             Hello,
           </Typography>
@@ -102,7 +126,7 @@ function LoginForm({ handleToggle }) {
             component="h1"
             align="center"
             gutterBottom
-            color="white" // Đổi màu chữ thành trắng
+            color="white"
           >
             Welcome!
           </Typography>
@@ -116,12 +140,12 @@ function LoginForm({ handleToggle }) {
             onChange={(e) => setUsername(e.target.value)}
             sx={{
               "& .MuiInputLabel-root": {
-                color: "white", // Đổi màu label thành trắng
+                color: "white",
               },
               "& .MuiOutlinedInput-root": {
-                color: "white", // Đổi màu chữ bên trong input thành trắng
+                color: "white",
                 "& fieldset": {
-                  borderColor: "white", // Đổi màu viền input thành trắng
+                  borderColor: "white",
                 },
               },
             }}
@@ -140,9 +164,8 @@ function LoginForm({ handleToggle }) {
             variant="body2"
             sx={{
               alignSelf: "baseline",
-              color: "white", // Đổi màu chữ liên kết thành trắng
+              color: "white",
             }}
-            inert={openForgotPassword ? "true" : undefined}
           >
             Forgot your password?
           </Link>
@@ -165,8 +188,6 @@ function LoginForm({ handleToggle }) {
                 <IconButton
                   aria-label="toggle password visibility"
                   onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                  onMouseUp={handleMouseUpPassword}
                   edge="end"
                 >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -176,9 +197,9 @@ function LoginForm({ handleToggle }) {
             label="Password"
             sx={{
               "& .MuiOutlinedInput-root": {
-                color: "white", // Đổi màu chữ bên trong input thành trắng
+                color: "white",
                 "& fieldset": {
-                  borderColor: "white", // Đổi màu viền input thành trắng
+                  borderColor: "white",
                 },
               },
             }}
@@ -187,7 +208,7 @@ function LoginForm({ handleToggle }) {
         <FormControlLabel
           control={<Checkbox value="remember" color="primary" />}
           label="Remember me"
-          sx={{ color: "white" }} // Đổi màu chữ checkbox thành trắng
+          sx={{ color: "white" }}
         />
         <Box>
           <Typography variant="body2" align="center" color="white">
@@ -197,7 +218,7 @@ function LoginForm({ handleToggle }) {
               onClick={handleToggle}
               sx={{
                 textTransform: "none",
-                color: "white", // Đổi màu chữ nút đăng ký thành trắng
+                color: "white",
               }}
             >
               Sign up
@@ -207,17 +228,35 @@ function LoginForm({ handleToggle }) {
         <Button
           type="submit"
           variant="contained"
+          disabled={isLoading} // Disable button while loading
           sx={{
             width: "100%",
             mt: 2,
             textTransform: "none",
-            backgroundColor: "#1976d2", // Màu nền nút
+            backgroundColor: "#1976d2",
           }}
         >
           Sign in
         </Button>
       </Box>
-      <ForgotPassword open={openForgotPassword} handleClose={handleClose} />
+      <ForgotPassword
+        open={openForgotPassword}
+        handleClose={handleCloseForgotPassword}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.type}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

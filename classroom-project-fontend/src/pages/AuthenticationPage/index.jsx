@@ -7,10 +7,12 @@ import LoginForm from "./LoginForm";
 import SignUpForm from "./SignupForm";
 import { Button } from "@mui/material";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
+import { useNavigate } from "react-router-dom";
 
 function AuthenticationPage() {
   const location = useLocation();
   const [isLogin, setIsLogin] = useState(location.pathname === "/login");
+  const navigate = useNavigate();
 
   const variants = {
     login: { x: 0 },
@@ -36,7 +38,7 @@ function AuthenticationPage() {
           sx={{
             textTransform: "none",
           }}
-          onClick={() => window.history.back()}
+          onClick={() => navigate("/")}
         >
           Back to Home
         </Button>

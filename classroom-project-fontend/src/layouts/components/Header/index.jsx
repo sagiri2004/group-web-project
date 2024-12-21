@@ -69,6 +69,8 @@ function Header() {
   const handleLogout = async () => {
     setAnchorEl(null);
     await dispatch(logoutUser(navigate));
+
+    navigate("/login");
   };
 
   const menuId = "primary-search-account-menu";

@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import routes from "~/config/routes";
+import apiClient from "~/api/apiClient";
 
 // Define the navigation structure
 const NAVIGATION = [
@@ -37,7 +38,7 @@ const NAVIGATION = [
     segment: "messages",
     title: "Messages",
     icon: <MessageIcon />,
-    route: routes.messenger.replace(":receiverId", "1"),
+    route: routes.messenger,
   },
 ];
 
@@ -48,7 +49,7 @@ function Sidebar() {
   const location = useLocation();
 
   // Handle the toggle of a segment (open/close) or navigate if no children
-  const handleOpen = (nav) => {
+  const handleOpen = async (nav) => {
     if (nav?.children && nav.children.length > 0) {
       setOpenSegments((prevOpenSegments) => ({
         ...prevOpenSegments,
@@ -58,7 +59,17 @@ function Sidebar() {
       if (isSelected === nav.segment) {
         setIsSelected("");
       } else {
-        setIsSelected(nav.segment);
+        // setIsSelected(nav.segment);
+        // neu la message thi goi api de lay danh sach conversation va id bat dau la id cua conversation dau tien
+        if (nav.segment === "messages") {
+          // call api
+          const { data } = await apiClient.get("/messages");
+          const conversationId = data[0].id;
+          console.log("conversationId", conversationId);
+          navigate(`/messages/${conversationId}`);
+        } else {
+          navigate(nav.route);
+        }
       }
     } else {
       setIsSelected(nav.segment);

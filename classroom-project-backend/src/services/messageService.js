@@ -49,6 +49,23 @@ async function getMessages(receiverId, user) {
 
 async function getConversations(user) {
   try {
+    // const conversations = await db.Conversation.findAll({
+    //   where: {
+    //     [Op.or]: [{ senderId: user.id }, { receiverId: user.id }],
+    //   },
+    //   include: [
+    //     {
+    //       model: db.User,
+    //       attributes: ["id", "username", "avatar", "name"],
+    //     },
+    //     {
+    //       model: db.User,
+    //       attributes: ["id", "username", "avatar", "name"],
+    //     },
+    //   ],
+    // });
+
+    // khong chi lay ra ma con sap xep theo timestamp cua message moi nhat
     const conversations = await db.Conversation.findAll({
       where: {
         [Op.or]: [{ senderId: user.id }, { receiverId: user.id }],
@@ -61,6 +78,15 @@ async function getConversations(user) {
         {
           model: db.User,
           attributes: ["id", "username", "avatar", "name"],
+        },
+        {
+          model: db.Message,
+          include: {
+            model: db.User,
+            attributes: ["id", "username", "avatar"],
+          },
+          order: [["timestamp", "DESC"]],
+          limit: 1,
         },
       ],
     });
