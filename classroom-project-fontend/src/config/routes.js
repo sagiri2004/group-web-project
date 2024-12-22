@@ -13,6 +13,7 @@ const routes = {
   myFlashcardSets: "/flashcards",
   messenger: "/messenger/:receiverId",
   about: "/about",
+  admin: "/admin",
 };
 
 export default routes;

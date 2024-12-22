@@ -28,7 +28,13 @@ module.exports = {
       },
       roleId: {
         type: Sequelize.INTEGER,
-        defaultValue: 0,
+        defaultValue: 0, // 0: user, 1: admin
+      },
+      status: {
+        // Thêm trường status để quản lý trạng thái người dùng
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: "active", // active, suspended, inactive
       },
       createdAt: {
         allowNull: false,

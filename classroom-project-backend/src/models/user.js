@@ -62,6 +62,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         defaultValue: 0,
       },
+      status: {
+        // Thêm trường status để quản lý trạng thái tài khoản
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "active", // active, suspended
+      },
     },
     {
       sequelize,

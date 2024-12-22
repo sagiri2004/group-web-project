@@ -23,6 +23,14 @@ async function loginUser(rawUserData) {
     };
   }
 
+  // neu user bi suspended
+  if (user.status === "suspended") {
+    return {
+      message: "User is suspended",
+      success: false,
+    };
+  }
+
   const match = await comparePasswords(password, user.password);
   if (!match) {
     return {

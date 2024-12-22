@@ -9,6 +9,7 @@ import {
   MessengerPage,
   MyFlashcardSetPage,
   AboutPage,
+  AdminPage,
 } from "~/pages";
 import Default from "~/layouts/Default";
 import config from "~/config";
@@ -51,6 +52,11 @@ const publicRoutes = [
     path: config.routes.messenger,
     component: MessengerPage,
     layout: Default,
+  },
+  {
+    path: config.routes.admin,
+    component: AdminPage,
+    layout: null,
   },
 ];
 
