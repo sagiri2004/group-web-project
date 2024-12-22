@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import {
   Box,
@@ -14,6 +14,9 @@ import {
   FormControlLabel,
   Checkbox,
   Button,
+  Snackbar,
+  Alert,
+  LinearProgress,
 } from "@mui/material";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -25,9 +28,16 @@ function SignUpForm({ handleToggle }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    type: "success",
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // Đặt useDispatch ở đây
+  const dispatch = useDispatch();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -46,27 +56,79 @@ function SignUpForm({ handleToggle }) {
       password: password,
     };
 
+    // Kiểm tra xem username và password có rỗng không
+    if (!username || !password || !confirmPassword) {
+      setSnackbar({
+        open: true,
+        message: "Please fill in all fields",
+        type: "error",
+      });
+      return;
+    }
+
+    // kiem tra da tick vao checkbox dieu khoan chua
+    if (!document.querySelector('input[type="checkbox"]').checked) {
+      setSnackbar({
+        open: true,
+        message: "Please agree to the Terms and Conditions",
+        type: "error",
+      });
+      return;
+    }
+
     // Kiểm tra xem mật khẩu và xác nhận mật khẩu có khớp không
     if (password !== confirmPassword) {
-      console.log("Passwords do not match");
+      setSnackbar({
+        open: true,
+        message: "Passwords do not match",
+        type: "error",
+      });
       return;
     }
 
     try {
+      setIsLoading(true); // Start the loading indicator
       const result = await dispatch(registerUser(user)); // Gọi dispatch trực tiếp ở đây
 
       if (result) {
-        navigate("/login");
+        if (result.payload.success) {
+          setSnackbar({
+            open: true,
+            message: "Account created successfully",
+            type: "success",
+          });
+        } else {
+          setSnackbar({
+            open: true,
+            message: result.payload?.message || "An unexpected error occurred",
+            type: "error",
+          });
+        }
+        // window.location.href = "/login";
       }
 
       console.log("Register result:", result);
+
+      setIsLoading(false); // Stop the loading indicator
     } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error.message || "An unexpected error occurred",
+        type: "error",
+      });
       console.log("Register error:", error.message ? error.message : error);
+
+      setIsLoading(false); // Stop the loading indicator
     }
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ open: false, message: "", type: "success" });
   };
 
   return (
     <Box flex="1">
+      {isLoading && <LinearProgress color="secondary" />}
       <Box
         component="form"
         onSubmit={handleSignUp}
@@ -86,7 +148,7 @@ function SignUpForm({ handleToggle }) {
             component="h1"
             align="center"
             gutterBottom
-            color="white" // Đổi màu chữ thành trắng
+            color="white"
           >
             Create an account
           </Typography>
@@ -100,12 +162,12 @@ function SignUpForm({ handleToggle }) {
             onChange={(e) => setUsername(e.target.value)}
             sx={{
               "& .MuiInputLabel-root": {
-                color: "white", // Đổi màu label thành trắng
+                color: "white",
               },
               "& .MuiOutlinedInput-root": {
-                color: "white", // Đổi màu chữ bên trong input thành trắng
+                color: "white",
                 "& fieldset": {
-                  borderColor: "white", // Đổi màu viền input thành trắng
+                  borderColor: "white",
                 },
               },
             }}
@@ -139,9 +201,9 @@ function SignUpForm({ handleToggle }) {
             label="Password"
             sx={{
               "& .MuiOutlinedInput-root": {
-                color: "white", // Đổi màu chữ bên trong input thành trắng
+                color: "white",
                 "& fieldset": {
-                  borderColor: "white", // Đổi màu viền input thành trắng
+                  borderColor: "white",
                 },
               },
             }}
@@ -175,9 +237,9 @@ function SignUpForm({ handleToggle }) {
             label="Confirm Password"
             sx={{
               "& .MuiOutlinedInput-root": {
-                color: "white", // Đổi màu chữ bên trong input thành trắng
+                color: "white",
                 "& fieldset": {
-                  borderColor: "white", // Đổi màu viền input thành trắng
+                  borderColor: "white",
                 },
               },
             }}
@@ -186,7 +248,7 @@ function SignUpForm({ handleToggle }) {
         <FormControlLabel
           control={<Checkbox value="terms" color="primary" />}
           label="I agree to the Terms and Conditions"
-          sx={{ color: "white" }} // Đổi màu chữ checkbox thành trắng
+          sx={{ color: "white" }}
         />
         <Box>
           <Typography variant="body2" align="center" color="white">
@@ -196,7 +258,7 @@ function SignUpForm({ handleToggle }) {
               onClick={handleToggle}
               sx={{
                 textTransform: "none",
-                color: "white", // Đổi màu chữ nút đăng nhập thành trắng
+                color: "white",
               }}
             >
               Sign in
@@ -210,12 +272,27 @@ function SignUpForm({ handleToggle }) {
             width: "100%",
             mt: 2,
             textTransform: "none",
-            backgroundColor: "#1976d2", // Màu nền nút
+            backgroundColor: "#1976d2",
           }}
         >
           Sign Up
         </Button>
       </Box>
+
+      {/* Snackbar notification */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.type}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

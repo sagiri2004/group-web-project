@@ -70,7 +70,7 @@ function Header() {
     setAnchorEl(null);
     await dispatch(logoutUser(navigate));
 
-    navigate("/login");
+    window.location.href = "/login";
   };
 
   const menuId = "primary-search-account-menu";

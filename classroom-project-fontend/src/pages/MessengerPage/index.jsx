@@ -13,15 +13,14 @@ import {
   Badge,
   InputAdornment,
   Tooltip,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { FiSend, FiSearch } from "react-icons/fi";
-import { BsEmojiSmile } from "react-icons/bs";
-import { RiAttachment2 } from "react-icons/ri";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useTheme } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
 import socket from "~/api/socketConfig";
 import apiClient from "~/api/apiClient";
 import { calculateTimeSince } from "~/utils/timeUtils";
@@ -55,17 +54,13 @@ const MessageContainer = styled(Box)({
   },
 });
 
-const MessageBubble = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "isOwn",
-})(({ theme, isOwn }) => ({
+const MessageBubble = styled(Box)(({ isOwn }) => ({
   display: "flex",
   justifyContent: isOwn ? "flex-end" : "flex-start",
   marginBottom: "10px",
 }));
 
-const Message = styled(Paper, {
-  shouldForwardProp: (prop) => prop !== "isOwn",
-})(({ theme, isOwn }) => ({
+const Message = styled(Paper)(({ isOwn }) => ({
   padding: "10px 15px",
   maxWidth: "70%",
   borderRadius: "18px",
@@ -78,70 +73,61 @@ const InputSection = styled(Box)({
   borderTop: "1px solid rgba(0, 0, 0, 0.12)",
 });
 
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 const ChatApp = () => {
   const [messages, setMessages] = useState([]);
-  const theme = useTheme();
-  const navigate = useNavigate();
   const [contacts, setContacts] = useState([]);
-
-  const [newMessage, setNewMessage] = useState("");
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [searchContacts, setSearchContacts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const messageEndRef = useRef(null);
-  const [receiverId, setReceiverId] = useState(
-    useParams().receiverId || contacts[0]?.id
-  );
   const user = useSelector((state) => state.auth.login.currentUser);
   const senderId = user.id;
+  const { receiverId: initialReceiverId } = useParams();
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [receiverId, setReceiverId] = useState(initialReceiverId || null);
+  const [currentConversation, setCurrentConversation] = useState(null);
+  const [newMessage, setNewMessage] = useState("");
 
-  const scrollToBottom = () => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const handleMenuOpen = (event) => {
+    setMenuAnchorEl(event.currentTarget);
   };
 
-  const [currentConversation, setCurrentConversation] = useState(null);
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
 
-  useEffect(() => {
-    const getConversations = async () => {
-      try {
-        const { data } = await apiClient.get("/messages");
-        console.log("Conversations:", data);
-        setContacts(data);
-      } catch (error) {
-        console.error("Error getting conversations:", error);
-      }
-    };
+  const handleSearchSelect = (contact) => {
+    setSearchQuery(contact.name);
+    changeReceiver(contact.id);
+    setMenuAnchorEl(null);
+    // tai lai trang de useEffect chay lai
+    window.location.reload();
+  };
 
-    getConversations();
-  }, []);
-
-  useEffect(() => {
-    const createOrGetConversation = async () => {
-      try {
-        const { data } = await apiClient.post(`/messages/conversations`, {
-          senderId,
-          receiverId,
-        });
-        setCurrentConversation(data);
-        socket.emit("join_conversation", data.id);
-      } catch (error) {
-        console.error("Error creating conversation:", error);
-      }
-    };
-
-    const getMessages = async () => {
-      try {
-        const { data } = await apiClient.get(`/messages/${receiverId}`);
-        data.forEach((message) => {
-          message.isOwn = message.senderId === senderId;
-        });
-        setMessages(data);
-      } catch (error) {
-        console.error("Error getting messages:", error);
-      }
-    };
-
-    createOrGetConversation();
-    getMessages();
-  }, [receiverId]);
+  const changeReceiver = (id) => {
+    setReceiverId(id);
+    socket.emit("leave_conversation", currentConversation?.id);
+    // tai lai trang de cap nhat conversation moi
+    navigate(`/messenger/${id}`);
+  };
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
@@ -154,208 +140,208 @@ const ChatApp = () => {
     };
 
     socket.emit("send_message", messageData);
-    messageData.isOwn = true;
-    messageData.timestamp = new Date().toISOString();
-    messageData.id = Math.floor(Math.random() * 1000000);
-    setMessages((prevMessages) => [...prevMessages, messageData]);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { ...messageData, isOwn: true, id: Math.random(), timestamp: new Date() },
+    ]);
     setNewMessage("");
   };
 
-  const handleSwitchConversation = (conversationId) => {
-    setCurrentConversation(conversationId);
-    socket.emit("leave_conversation", conversationId);
-    setReceiverId(conversationId);
-    scrollToBottom();
-  };
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        if (debouncedSearchQuery.trim()) {
+          const { data } = await apiClient.post(`/user/find`, {
+            name: debouncedSearchQuery,
+          });
+          setSearchContacts(data.data);
+        } else {
+          const { data } = await apiClient.get("/messages");
+          console.log(data);
+          setContacts(data);
+
+          if (!receiverId && data.length > 0) {
+            changeReceiver(data[0].id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching contacts:", error);
+      }
+    };
+    fetchContacts();
+  }, [debouncedSearchQuery, receiverId, initialReceiverId]);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!receiverId) return;
+
+      try {
+        const { data } = await apiClient.get(`/messages/${receiverId}`);
+        setMessages(
+          data.map((msg) => ({
+            ...msg,
+            isOwn: msg.senderId === senderId,
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+
+    const initConversation = async () => {
+      if (!receiverId) return;
+
+      try {
+        const { data } = await apiClient.post("/messages/conversations", {
+          senderId,
+          receiverId,
+        });
+        setCurrentConversation(data);
+        socket.emit("join_conversation", data.id);
+      } catch (error) {
+        console.error("Error initializing conversation:", error);
+      }
+    };
+
+    fetchMessages();
+    initConversation();
+  }, [receiverId, senderId]);
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
     });
 
-    socket.on("send_message_success", (newMessage) => {
-      console.log("Message sent successfully:", newMessage);
-    });
-
-    socket.on("error", (errorMessage) => {
-      console.error("Error:", errorMessage);
-    });
-
-    socket.on("join_conversation", (conversationId) => {
-      console.log(`User joined conversation: ${conversationId}`);
-    });
-
-    socket.on("leave_conversation", (conversationId) => {
-      console.log(`User left conversation: ${conversationId}`);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
-    });
-
     return () => {
       socket.off("receive_message");
-      socket.off("send_message_success");
-      socket.off("error");
-      socket.off("join_conversation");
-      socket.off("leave_conversation");
-      socket.off("disconnect");
     };
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Handle search on Enter key
-  const handleSearch = async (e) => {
-    if (e.key === "Enter" && searchQuery.trim()) {
-      try {
-        const { data } = await apiClient.post(`/messages/conversations/name`, {
-          name: searchQuery,
-          receiverId,
-        });
-        console.log("Search results:", data);
-        setContacts(data); // Update contacts list with search results
-      } catch (error) {
-        console.error("Error searching conversations:", error);
-      }
-    }
-  };
-
   return (
-    <div>
-      <ChatContainer>
-        <ContactsSection>
-          <Box p={2}>
-            <TextField
-              fullWidth
-              placeholder="Search contacts"
-              variant="outlined"
-              size="small"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleSearch} // Listen for the Enter key
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FiSearch />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
-          <List>
-            {contacts.map((contact) => (
-              <ListItem
+    <ChatContainer>
+      <ContactsSection>
+        <Box p={2}>
+          <TextField
+            fullWidth
+            placeholder="Search contacts"
+            variant="outlined"
+            size="small"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onClick={(e) => {
+              if (searchContacts.length > 0 || !searchQuery.trim()) {
+                handleMenuOpen(e);
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <FiSearch />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Menu
+            anchorEl={menuAnchorEl}
+            open={Boolean(menuAnchorEl)}
+            onClose={handleMenuClose}
+          >
+            {searchContacts.map((contact) => (
+              <MenuItem
                 key={contact.id}
-                onClick={() => handleSwitchConversation(contact.id)}
-                button
-                sx={{
-                  "&:hover": {
-                    backgroundColor:
-                      contact.id === Number(receiverId)
-                        ? theme.palette.primary.dark
-                        : theme.palette.action.hover,
-                  },
-                  backgroundColor:
-                    contact.id === Number(receiverId)
-                      ? theme.palette.primary.main
-                      : "inherit",
-                  color:
-                    contact.id === Number(receiverId)
-                      ? theme.palette.primary.contrastText
-                      : "inherit",
-                }}
+                onClick={() => handleSearchSelect(contact)}
               >
                 <ListItemAvatar>
-                  <Badge
-                    overlap="circular"
-                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                  >
-                    <Avatar src={contact.avatar} alt={contact.name} />
-                  </Badge>
+                  <Avatar src={contact.avatar} alt={contact.name} />
                 </ListItemAvatar>
                 <ListItemText primary={contact.name} />
-              </ListItem>
+              </MenuItem>
             ))}
-          </List>
-        </ContactsSection>
+          </Menu>
+        </Box>
+        <List>
+          {contacts.map((contact) => (
+            <ListItem
+              key={contact.id}
+              onClick={() => changeReceiver(contact.id)}
+              button
+              sx={{
+                backgroundColor:
+                  contact.id === Number(receiverId)
+                    ? theme.palette.primary.main
+                    : "inherit",
+                color:
+                  contact.id === Number(receiverId)
+                    ? theme.palette.primary.contrastText
+                    : "inherit",
+              }}
+            >
+              <ListItemAvatar>
+                <Badge>
+                  <Avatar src={contact.avatar} alt={contact.name} />
+                </Badge>
+              </ListItemAvatar>
+              <ListItemText primary={contact.name} />
+            </ListItem>
+          ))}
+        </List>
+      </ContactsSection>
 
-        <ChatSection>
-          <Box
-            p={2}
-            sx={{
-              borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
+      <ChatSection>
+        <Box
+          p={2}
+          sx={{
+            borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+          }}
+        >
+          <Typography variant="h6">Chat</Typography>
+        </Box>
+        <MessageContainer>
+          {messages.map((msg) => (
+            <MessageBubble key={msg.id} isOwn={msg.isOwn}>
+              <Message isOwn={msg.isOwn}>
+                <Typography>{msg.text}</Typography>
+                <Typography variant="caption">
+                  {calculateTimeSince(msg.timestamp)}
+                </Typography>
+              </Message>
+            </MessageBubble>
+          ))}
+          <div ref={messageEndRef} />
+        </MessageContainer>
+        <InputSection>
+          <TextField
+            fullWidth
+            multiline
+            maxRows={4}
+            placeholder="Type a message..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
             }}
-          >
-            <Typography variant="h6">Chat</Typography>
-          </Box>
-
-          <MessageContainer>
-            {messages.map((message) => (
-              <MessageBubble key={message.id} isOwn={message.isOwn}>
-                <Message isOwn={message.isOwn}>
-                  <Typography>{message.text}</Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ display: "block", mt: 0.5, opacity: 0.7 }}
-                  >
-                    {calculateTimeSince(message.timestamp)}
-                  </Typography>
-                </Message>
-              </MessageBubble>
-            ))}
-            <div ref={messageEndRef} />
-          </MessageContainer>
-
-          <InputSection>
-            <TextField
-              fullWidth
-              multiline
-              maxRows={4}
-              placeholder="Type a message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Tooltip title="Add emoji">
-                      <IconButton size="small">
-                        <BsEmojiSmile />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Attach file">
-                      <IconButton size="small">
-                        <RiAttachment2 />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Send message">
-                      <IconButton
-                        onClick={handleSendMessage}
-                        size="small"
-                        color="primary"
-                      >
-                        <FiSend />
-                      </IconButton>
-                    </Tooltip>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </InputSection>
-        </ChatSection>
-      </ChatContainer>
-    </div>
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Tooltip title="Send message">
+                    <IconButton onClick={handleSendMessage}>
+                      <FiSend />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </InputSection>
+      </ChatSection>
+    </ChatContainer>
   );
 };
 

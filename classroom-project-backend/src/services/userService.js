@@ -17,6 +17,28 @@ async function getMe(userId) {
   }
 }
 
+async function findUserByName(name) {
+  try {
+    const users = await db.User.findAll({
+      where: {
+        name: {
+          [db.Sequelize.Op.like]: `%${name}%`,
+        },
+      },
+      attributes: ["id", "username", "name", "avatar"],
+    });
+
+    return {
+      message: "Users found",
+      data: users,
+    };
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 module.exports = {
   getMe,
+  findUserByName,
 };
