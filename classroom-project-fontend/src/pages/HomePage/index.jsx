@@ -4,7 +4,6 @@ import {
   Typography,
   Paper,
   Avatar,
-  CircularProgress,
   Stack,
   Grid,
   Card,
@@ -12,6 +11,7 @@ import {
   CardMedia,
   Divider,
   Button,
+  Skeleton,
 } from "@mui/material";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import CloudIcon from "@mui/icons-material/Cloud";
@@ -37,7 +37,6 @@ function HomePage() {
   };
 
   useEffect(() => {
-    //neu nguoi dung chua dang nhap thi chuyen huong ve trang trang about
     if (!localStorage.getItem("token")) {
       navigate("/about");
     }
@@ -104,11 +103,30 @@ function HomePage() {
     return (
       <Box
         display="flex"
-        justifyContent="center"
-        alignItems="center"
         height="100vh"
+        width="100%"
+        sx={{
+          padding: 2,
+        }}
       >
-        <CircularProgress />
+        <Grid container spacing={2} justifyContent="center">
+          <Grid item xs={6} sm={3}>
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height={200}
+              sx={{ borderRadius: 2 }}
+            />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height={200}
+              sx={{ borderRadius: 2 }}
+            />
+          </Grid>
+        </Grid>
       </Box>
     );
   }
@@ -142,7 +160,7 @@ function HomePage() {
             elevation={3}
             sx={{ padding: 3, textAlign: "center", borderRadius: 2 }}
           >
-            {weatherData && (
+            {weatherData ? (
               <>
                 {weatherData.condition === "Clear" ? (
                   <WbSunnyIcon fontSize="large" color="warning" />
@@ -156,11 +174,17 @@ function HomePage() {
                 </Typography>
                 <Typography variant="body1">{weatherData.condition}</Typography>
               </>
+            ) : (
+              <>
+                <Skeleton variant="circle" width={40} height={40} />
+                <Skeleton width="80%" />
+                <Skeleton width="60%" />
+              </>
             )}
             <Box mt={2}>
               <Typography variant="h6">Current Time</Typography>
               <Typography variant="h5" fontWeight="bold">
-                {currentTime}
+                {currentTime || <Skeleton width="60%" />}
               </Typography>
             </Box>
           </Paper>

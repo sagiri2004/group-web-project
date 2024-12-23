@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 
-function Default({ children }) {
+function DefaultWithScrollbar({ children }) {
   return (
     <Box
       bgcolor={"bg-main"}
@@ -31,7 +31,7 @@ function Default({ children }) {
             display: "flex",
             flexDirection: "column",
             flexGrow: 1,
-            // overflow: "auto",
+            overflow: "auto",
             //css scroll bar
             "&::-webkit-scrollbar": {
               width: "8px",
@@ -43,10 +43,8 @@ function Default({ children }) {
               backgroundImage: "linear-gradient(-45deg, #6a5af9, #d66efd)",
             },
             "&::-webkit-scrollbar-track": {
-              backgroundColor: "white",
+              backgroundColor: null,
             },
-            // if scrollBar is true, show scroll bar
-            // overflow: scrollBar ? "auto" : "hidden",
           }}
         >
           <Box>{children}</Box>
@@ -56,4 +54,4 @@ function Default({ children }) {
   );
 }
 
-export default Default;
+export default DefaultWithScrollbar;

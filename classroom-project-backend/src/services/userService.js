@@ -38,7 +38,30 @@ async function findUserByName(name) {
   }
 }
 
+async function updateUser(userId, user) {
+  try {
+    await db.User.update(user, {
+      where: {
+        id: userId,
+      },
+    });
+
+    const newUser = await db.User.findByPk(userId, {
+      attributes: ["id", "username", "name", "avatar"],
+    });
+
+    return {
+      message: "User updated successfully",
+      user: newUser,
+    };
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 module.exports = {
   getMe,
   findUserByName,
+  updateUser,
 };

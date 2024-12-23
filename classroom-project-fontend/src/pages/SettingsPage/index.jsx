@@ -18,6 +18,8 @@ import DoneIcon from "@mui/icons-material/Done";
 import { useEffect, useState } from "react";
 
 import SettingPageSkeleton from "./Skeleton";
+import SelectTheme from "~/components/SelectTheme";
+import { uploadImageToCloudinary } from "~/api/cloudinary";
 
 import { useDispatch } from "react-redux";
 import { updateUser, fetchUser } from "~/redux/userSlice";
@@ -53,10 +55,10 @@ function SettingPage() {
     avatar: null,
     name: null,
   });
-  const dispatch = useDispatch();
-
   const [name, setName] = useState(null);
   const [open, setOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setIsLoading(true);
@@ -69,7 +71,7 @@ function SettingPage() {
         setName(res.name);
         setIsLoading(false);
       });
-  }, []);
+  }, [dispatch]);
 
   if (isLoading) {
     return (
@@ -90,14 +92,13 @@ function SettingPage() {
 
   const handleSelectAvatar = (avatar) => {
     setSelectedAvatar(avatar);
-    console.log("avatar", avatar);
     setUser((prevUser) => ({ ...prevUser, avatar: avatar }));
   };
 
   const handleSave = async () => {
     await dispatch(updateUser(user));
     handleClose();
-    window.location.href = "/";
+    // window.location.href = "/";
   };
 
   const handleChangeName = (e) => {
@@ -111,6 +112,29 @@ function SettingPage() {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleUploadImage = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setIsUploading(true);
+      try {
+        const uploadedUrl = await uploadImageToCloudinary(file);
+        animalImages.push(uploadedUrl.url);
+        handleSelectAvatar(uploadedUrl.url);
+      } catch (error) {
+        console.error("Image upload failed:", error);
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
+  const handleFabClick = () => {
+    const fileInput = document.getElementById("upload-avatar");
+    if (fileInput) {
+      fileInput.click();
+    }
   };
 
   return (
@@ -201,12 +225,20 @@ function SettingPage() {
                   color="primary"
                   aria-label="add"
                   sx={{ width: 50, height: 50, mx: 1, zIndex: 1 }}
-                  onClick={() => handleSelectAvatar(null)}
+                  onClick={handleFabClick}
                 >
                   <AddIcon />
                 </Fab>
+                <input
+                  type="file"
+                  id="upload-avatar"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleUploadImage}
+                />
               </Box>
             </Box>
+            {isUploading && <Typography>Uploading...</Typography>}
           </Box>
           <Divider />
           <Box

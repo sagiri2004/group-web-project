@@ -12,6 +12,7 @@ import {
   DialogContentText,
   DialogActions,
   TextField,
+  Skeleton,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { styled } from "@mui/system";
@@ -70,8 +71,6 @@ function ClassroomsPage() {
   const [myClassrooms, setMyClassrooms] = useState([]);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  console.log("classrooms", classrooms);
-  console.log("myClassrooms", myClassrooms);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -80,6 +79,7 @@ function ClassroomsPage() {
   const [joinFormData, setJoinFormData] = useState({
     classroomId: "",
   });
+  const [loading, setLoading] = useState(true);
 
   const openMenu = Boolean(anchorEl);
 
@@ -107,16 +107,20 @@ function ClassroomsPage() {
 
   const handleCreateDialogClose = () => {
     setCreateDialogOpen(false);
-    setFormData({ name: "", description: "", image: null }); // Reset form
+    setFormData({ name: "", description: "", image: null });
   };
 
   useEffect(() => {
-    apiClient.get("/classroom/list").then((response) => {
-      setClassrooms(response.data.data);
-    });
-    apiClient.get("/classroom/list-created").then((response) => {
-      setMyClassrooms(response.data.data);
-    });
+    setLoading(true);
+    Promise.all([
+      apiClient.get("/classroom/list"),
+      apiClient.get("/classroom/list-created"),
+    ])
+      .then(([joinedResponse, createdResponse]) => {
+        setClassrooms(joinedResponse.data.data);
+        setMyClassrooms(createdResponse.data.data);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const handleInputChange = (e) => {
@@ -148,14 +152,9 @@ function ClassroomsPage() {
         imageUrl,
       };
 
-      console.log("Classroom data to send:", newClassroom);
-
-      // Gửi dữ liệu lên backend
       const response = await apiClient.post("/classroom/create", newClassroom);
-      console.log("Classroom created successfully:", response.data);
 
       setMyClassrooms((prev) => [...prev, response.data.data.classroom]);
-      // Thêm classroom mới vào danh sách
       handleCreateDialogClose();
     } catch (error) {
       console.error("Failed to create classroom:", error);
@@ -167,7 +166,6 @@ function ClassroomsPage() {
       const response = await apiClient.post(`/classroom/join`, {
         classroomId: joinFormData.classroomId,
       });
-      console.log("Joined classroom successfully:", response.data);
 
       setClassrooms((prev) => [...prev, response.data.data.classroom]);
       handleJoinDialogClose();
@@ -237,32 +235,48 @@ function ClassroomsPage() {
         }}
       >
         <Typography variant="h6">My Created Classrooms</Typography>
-        <Grid
-          container
-          spacing={{ xs: 2, md: 3 }}
-          columns={{ xs: 4, sm: 8, md: 12 }}
-        >
-          {myClassrooms.map((classroom) => (
-            <Grid item xs={3} sm={3} md={3} key={classroom.id}>
-              <ClassroomItem classroom={classroom} />
-            </Grid>
-          ))}
-        </Grid>
+        {loading ? (
+          <Grid container spacing={3}>
+            {[...Array(4)].map((_, index) => (
+              <Grid item xs={3} sm={3} md={3} key={index}>
+                <Skeleton variant="rectangular" height={150} />
+              </Grid>
+            ))}
+          </Grid>
+        ) : myClassrooms.length === 0 ? (
+          <Typography>No classes created yet. Create one now!</Typography>
+        ) : (
+          <Grid container spacing={3}>
+            {myClassrooms.map((classroom) => (
+              <Grid item xs={3} sm={3} md={3} key={classroom.id}>
+                <ClassroomItem classroom={classroom} />
+              </Grid>
+            ))}
+          </Grid>
+        )}
 
         <Typography variant="h6" sx={{ mt: 4 }}>
           Joined Classrooms
         </Typography>
-        <Grid
-          container
-          spacing={{ xs: 2, md: 3 }}
-          columns={{ xs: 4, sm: 8, md: 12 }}
-        >
-          {classrooms.map((classroom) => (
-            <Grid item xs={3} sm={3} md={3} key={classroom.id}>
-              <ClassroomItem classroom={classroom} />
-            </Grid>
-          ))}
-        </Grid>
+        {loading ? (
+          <Grid container spacing={3}>
+            {[...Array(4)].map((_, index) => (
+              <Grid item xs={3} sm={3} md={3} key={index}>
+                <Skeleton variant="rectangular" height={150} />
+              </Grid>
+            ))}
+          </Grid>
+        ) : classrooms.length === 0 ? (
+          <Typography>No joined classrooms. Join one now!</Typography>
+        ) : (
+          <Grid container spacing={3}>
+            {classrooms.map((classroom) => (
+              <Grid item xs={3} sm={3} md={3} key={classroom.id}>
+                <ClassroomItem classroom={classroom} />
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Box>
 
       {/* Join Classroom Dialog */}

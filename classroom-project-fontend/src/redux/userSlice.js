@@ -16,7 +16,7 @@ export const fetchUser = createAsyncThunk(
   "user/fetchUser",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get("/user");
+      const response = await apiClient.get("/user/me");
       return response?.data?.data;
     } catch (error) {
       console.error("Fetch user error:", error);
@@ -30,7 +30,8 @@ export const updateUser = createAsyncThunk(
   async (user, { rejectWithValue }) => {
     try {
       const response = await apiClient.put("/user", user);
-      return response?.data?.data;
+      console.log("Update user response:", response.data.user);
+      return response?.data?.user;
     } catch (error) {
       console.error("Update user error:", error);
       return rejectWithValue(error.response?.data || "Update user failed");
@@ -44,6 +45,9 @@ const userSlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null;
+    },
+    setUser: (state, action) => {
+      state.currentUser = action.payload; // Cập nhật user từ action
     },
   },
   extraReducers: (builder) => {

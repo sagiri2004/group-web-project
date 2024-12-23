@@ -1,6 +1,13 @@
 import apiClient from "~/api/apiClient";
 import { useEffect, useState } from "react";
-import { Box, Typography, IconButton, Tooltip, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  IconButton,
+  Tooltip,
+  Button,
+  Skeleton,
+} from "@mui/material";
 
 // su dung react-router-dom de chuyen trang
 import { useNavigate } from "react-router-dom";
@@ -12,6 +19,7 @@ import DialogAddFlashcardSet from "./DialogAddFlashcardSet";
 
 function MyFlashcardSetPage() {
   const [flashcardSets, setFlashcardSets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleOpen = () => setDialogOpen(true);
@@ -41,12 +49,13 @@ function MyFlashcardSetPage() {
       })
       .catch((error) => {
         console.error("Error fetching flashcard sets:", error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
   const handleClickFlashcardSet = (id) => {
-    // window.location.href = `/flashcards/${id}`;
-    // su dung useNavigate de chuyen trang
     navigate(`/flashcards/${id}`);
     console.log("Clicked flashcard set with id:", id);
   };
@@ -71,16 +80,20 @@ function MyFlashcardSetPage() {
         mb={3}
         sx={{ width: "70%" }}
       >
-        <Typography variant="h4" fontWeight="bold">
-          My Flashcard Sets
-        </Typography>
+        <Typography variant="h5">My Flashcard Sets</Typography>
         <Button variant="contained" color="primary" onClick={handleOpen}>
           Create
         </Button>
       </Box>
 
       <Box sx={{ width: "70%" }}>
-        {flashcardSets.length > 0 ? (
+        {loading ? (
+          <Box display="flex" gap={2} flexDirection="column">
+            {[1, 2, 3].map((skeleton) => (
+              <Skeleton key={skeleton} variant="rectangular" height={80} />
+            ))}
+          </Box>
+        ) : flashcardSets.length > 0 ? (
           <Box display="flex" gap={2} flexDirection="column">
             {flashcardSets.map((flashcardSet) => (
               <FlashcardSet

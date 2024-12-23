@@ -86,7 +86,10 @@ function Sidebar() {
       }}
     >
       {NAVIGATION.map((nav) => {
-        const isActive = location.pathname.startsWith(nav.route); // Check if the current route is active
+        const isActive =
+          nav.route === "/"
+            ? location.pathname === nav.route // Ensure "/" is active only when exactly at "/"
+            : location.pathname.startsWith(nav.route); // Match other routes as before
 
         return (
           <Box key={nav.segment}>
@@ -98,11 +101,11 @@ function Sidebar() {
                 cursor: "pointer",
                 height: "64px",
                 // backgroundColor: isActive ? "primary.light" : "inherit", // Highlight active item
-                "&:hover": {
-                  backgroundColor: isActive
-                    ? "primary.light"
-                    : "primary.lighter", // Hover effect
-                },
+                // "&:hover": {
+                //   backgroundColor: isActive
+                //     ? "primary.light"
+                //     : "primary.lighter", // Hover effect
+                // },
               }}
               selected={isSelected === nav.segment} // Mark as selected
               onClick={() => handleOpen(nav)} // Handle item click

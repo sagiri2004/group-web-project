@@ -12,6 +12,7 @@ import {
   AdminPage,
 } from "~/pages";
 import Default from "~/layouts/Default";
+import DefaultWithScrollbar from "~/layouts/DefaultWithScrollbar";
 import config from "~/config";
 
 const publicRoutes = [
@@ -27,7 +28,11 @@ const publicRoutes = [
     component: AboutPage,
     layout: null,
   },
-  { path: config.routes.settings, component: Settings, layout: Default },
+  {
+    path: config.routes.settings,
+    component: Settings,
+    layout: DefaultWithScrollbar,
+  },
   { path: config.routes.classrooms, component: Classrooms, layout: Default },
   { path: config.routes.classroom, component: Classroom, layout: Default },
   { path: config.routes.assignments, component: Classroom, layout: Default },
@@ -41,12 +46,20 @@ const publicRoutes = [
     component: Classroom,
     layout: Default,
   },
-  { path: config.routes.flashCards, component: FlashCardPage, layout: Default },
-  { path: config.routes.edit, component: EditFlashcardPage, layout: Default },
+  {
+    path: config.routes.flashCards,
+    component: FlashCardPage,
+    layout: DefaultWithScrollbar,
+  },
+  {
+    path: config.routes.edit,
+    component: EditFlashcardPage,
+    layout: DefaultWithScrollbar,
+  },
   {
     path: config.routes.myFlashcardSets,
     component: MyFlashcardSetPage,
-    layout: Default,
+    layout: DefaultWithScrollbar,
   },
   {
     path: config.routes.messenger,
