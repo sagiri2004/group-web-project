@@ -140,6 +140,7 @@ const ChatApp = () => {
     };
 
     socket.emit("send_message", messageData);
+    console.log("Message sent:", messageData);
     setMessages((prevMessages) => [
       ...prevMessages,
       { ...messageData, isOwn: true, id: Math.random(), timestamp: new Date() },
@@ -214,6 +215,17 @@ const ChatApp = () => {
 
     return () => {
       socket.off("receive_message");
+    };
+  }, []);
+
+  // lang nghe su kien khi co user chua tung gui tin nhan gui tin nhan (new_conversation)
+  useEffect(() => {
+    socket.on("new_conversation", (data) => {
+      setCurrentConversation(data);
+    });
+
+    return () => {
+      socket.off("new_conversation");
     };
   }, []);
 

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+
+import { jwtDecode } from "jwt-decode";
 
 import {
   Box,
@@ -22,12 +25,13 @@ import {
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-import { loginUser } from "~/redux/authSlice";
+import { loginUser, forgotPassword } from "~/redux/authSlice";
 import ForgotPassword from "./ForgotPassword";
 
 function LoginForm({ handleToggle }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [openForgotPassword, setOpenForgotPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +53,57 @@ function LoginForm({ handleToggle }) {
   const handleCloseForgotPassword = (event) => {
     event.preventDefault();
     setOpenForgotPassword(false);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setSnackbar({
+        open: true,
+        message: "Email is required",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!username) {
+      setSnackbar({
+        open: true,
+        message: "Username is required",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsLoading(true); // Start the loading indicator
+    try {
+      const result = await dispatch(forgotPassword({ email, username }));
+
+      console.log("result", result);
+
+      if (result.payload.success) {
+        setSnackbar({
+          open: true,
+          message: result.payload?.message || "Reset password successful",
+          type: "success",
+        });
+        setOpenForgotPassword(false);
+      } else {
+        setSnackbar({
+          open: true,
+          message: result.payload?.message || "Reset password failed",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: "An unexpected error occurred",
+        type: "error",
+      });
+      console.error("Failed to reset password:", error);
+    } finally {
+      setIsLoading(false); // Stop the loading indicator
+    }
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -93,6 +148,47 @@ function LoginForm({ handleToggle }) {
     } finally {
       setIsLoading(false); // Stop the loading indicator
     }
+  };
+
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
+    try {
+      console.log("Google login response:", credentialResponse);
+      const user = jwtDecode(credentialResponse.credential);
+      console.log("Decoded Google Token:", user);
+
+      // Dispatch a login action with Google data
+      const result = await dispatch(loginUser(user));
+
+      if (result.payload.success) {
+        setSnackbar({
+          open: true,
+          message: "Google login successful",
+          type: "success",
+        });
+        navigate("/");
+      } else {
+        setSnackbar({
+          open: true,
+          message: "Google login failed",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      setSnackbar({
+        open: true,
+        message: "An unexpected error occurred with Google login",
+        type: "error",
+      });
+    }
+  };
+
+  const handleGoogleLoginError = () => {
+    setSnackbar({
+      open: true,
+      message: "Google login failed",
+      type: "error",
+    });
   };
 
   return (
@@ -225,6 +321,13 @@ function LoginForm({ handleToggle }) {
             </Button>
           </Typography>
         </Box>
+        <Typography variant="h6" color="white" align="center" gutterBottom>
+          Or sign in with Google
+        </Typography>
+        <GoogleLogin
+          onSuccess={handleGoogleLoginSuccess}
+          onError={handleGoogleLoginError}
+        />
         <Button
           type="submit"
           variant="contained"
@@ -242,6 +345,11 @@ function LoginForm({ handleToggle }) {
       <ForgotPassword
         open={openForgotPassword}
         handleClose={handleCloseForgotPassword}
+        handleForgotPassword={handleForgotPassword}
+        email={email}
+        setEmail={setEmail}
+        username={username}
+        setUsername={setUsername}
       />
 
       <Snackbar

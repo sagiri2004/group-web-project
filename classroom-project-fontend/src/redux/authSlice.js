@@ -48,6 +48,24 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
+export const forgotPassword = createAsyncThunk(
+  "auth/forgotPassword",
+  async ({ email, username }, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.post("/auth/forgot-password", {
+        email,
+        username,
+      });
+      return response?.data;
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      return rejectWithValue(
+        error.response?.data || { message: "Forgot password failed" }
+      );
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -73,6 +91,11 @@ const authSlice = createSlice({
       loading: false,
       message: null, // Thêm trường message
     },
+    forgotPassword: {
+      error: null,
+      loading: false,
+      message: null, // Thêm trường message
+    },
   },
   reducers: {
     clearError: (state) => {
@@ -82,6 +105,8 @@ const authSlice = createSlice({
       state.register.message = null;
       state.logout.error = null;
       state.logout.message = null;
+      state.forgotPassword.error = null;
+      state.forgotPassword.message = null;
     },
   },
   extraReducers: (builder) => {
@@ -150,6 +175,23 @@ const authSlice = createSlice({
         state.register.loading = false;
         state.register.error = action.payload?.message || "Registration failed";
         state.register.message = action.payload?.message; // Hiển thị thông báo lỗi
+      })
+      // Xử lý Forgot password
+      .addCase(forgotPassword.pending, (state) => {
+        state.forgotPassword.loading = true;
+        state.forgotPassword.error = null;
+        state.forgotPassword.message = null;
+      })
+      .addCase(forgotPassword.fulfilled, (state, action) => {
+        state.forgotPassword.loading = false;
+        state.forgotPassword.error = null;
+        state.forgotPassword.message = action.payload?.message; // Hiển thị thông báo từ server
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.forgotPassword.loading = false;
+        state.forgotPassword.error =
+          action.payload?.message || "Forgot password failed";
+        state.forgotPassword.message = action.payload?.message; // Hiển thị thông báo lỗi
       });
   },
 });

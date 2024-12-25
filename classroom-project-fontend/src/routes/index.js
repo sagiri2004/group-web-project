@@ -10,6 +10,7 @@ import {
   MyFlashcardSetPage,
   AboutPage,
   AdminPage,
+  ResetPassword,
 } from "~/pages";
 import Default from "~/layouts/Default";
 import DefaultWithScrollbar from "~/layouts/DefaultWithScrollbar";
@@ -69,6 +70,11 @@ const publicRoutes = [
   {
     path: config.routes.admin,
     component: AdminPage,
+    layout: null,
+  },
+  {
+    path: config.routes.resetPassword,
+    component: ResetPassword,
     layout: null,
   },
 ];

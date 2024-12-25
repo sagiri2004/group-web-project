@@ -9,3 +9,4 @@ export { default as MessengerPage } from "./MessengerPage";
 export { default as MyFlashcardSetPage } from "./MyFlashcardSetPage";
 export { default as AboutPage } from "./AboutPage";
 export { default as AdminPage } from "./AdminPage";
+export { default as ResetPassword } from "./ResetPassword";

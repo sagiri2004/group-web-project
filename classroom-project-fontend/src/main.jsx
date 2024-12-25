@@ -6,11 +6,16 @@ import store, { persistor } from "~/redux/store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
 import App from "./App";
 import theme from "./theme";
 
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement);
+
+const GOOGLE_CLIENT_ID =
+  "401336515446-7243voavrlot5rqr2c4d4ns7cb6mtlrk.apps.googleusercontent.com";
 
 root.render(
   <Provider store={store}>
@@ -18,7 +23,9 @@ root.render(
       <React.StrictMode>
         <CssVarsProvider theme={theme}>
           <CssBaseline />
-          <App />
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <App />
+          </GoogleOAuthProvider>
         </CssVarsProvider>
       </React.StrictMode>
     </PersistGate>

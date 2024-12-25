@@ -19,6 +19,28 @@ class AuthController {
 
     res.json(result);
   }
+
+  async changePassword(req, res) {
+    const rawUserData = req.body;
+    const result = await authService.changePassword(rawUserData);
+
+    res.json(result);
+  }
+
+  async forgotPassword(req, res) {
+    const rawUserData = req.body;
+    console.log("rawUserData", rawUserData);
+    const result = await authService.forgotPassword(rawUserData);
+
+    res.json(result);
+  }
+
+  async resetPassword(req, res) {
+    const rawUserData = req.body;
+    const result = await authService.resetPassword(rawUserData);
+
+    res.json(result);
+  }
 }
 
 module.exports = new AuthController();

@@ -139,30 +139,23 @@ async function createConversationWithName(senderId, name) {
       return { message: "User not found" };
     }
 
-    // tao conversation
-    const conversation = await createConversation(senderId, receiver.id);
-
-    // tra ve toan bo conversations da tao
-    const conversations = await db.Conversation.findAll({
+    let conversation = await db.Conversation.findOne({
       where: {
-        [Op.or]: [{ senderId }, { receiverId }],
+        [Op.or]: [
+          { senderId, receiverId: receiver.id },
+          { senderId: receiver.id, receiverId: senderId },
+        ],
       },
-      include: [
-        {
-          model: db.User,
-          attributes: ["id", "username", "avatar", "name"],
-        },
-        {
-          model: db.User,
-          attributes: ["id", "username", "avatar", "name"],
-        },
-      ],
     });
 
-    // extract users from conversations
-    const users = extractUsers(conversations);
+    if (!conversation) {
+      conversation = await db.Conversation.create({
+        senderId,
+        receiverId: receiver.id,
+      });
+    }
 
-    return users;
+    return conversation;
   } catch (error) {
     console.error(error);
     return null;

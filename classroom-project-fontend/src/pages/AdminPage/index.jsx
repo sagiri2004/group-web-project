@@ -32,6 +32,7 @@ const UsersPage = () => {
   const [newUser, setNewUser] = useState({
     username: "",
     name: "",
+    email: "",
     password: "",
     avatar: "",
     roleId: 0,
@@ -45,104 +46,99 @@ const UsersPage = () => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = () => {
-    setLoading(true);
-    apiClient
-      .get("/admin")
-      .then((response) => {
-        setUsers(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-        setLoading(false);
-        setSnackbarMessage("Error fetching users.");
-        setSnackbarOpen(true);
-      });
-  };
-
-  const handleCreateUser = () => {
-    setLoading(true);
-    apiClient
-      .post("/admin", newUser)
-      .then((response) => {
-        setUsers([...users, response.data]);
-        setOpenCreateDialog(false);
-        setLoading(false);
-        setSnackbarMessage("User created successfully.");
-        setSnackbarOpen(true);
-      })
-      .catch((error) => {
-        console.error("Error creating user:", error);
-        setLoading(false);
-        setSnackbarMessage("Error creating user.");
-        setSnackbarOpen(true);
-      });
-  };
-
-  const handleUpdateUser = () => {
-    if (selectedUser) {
+  const fetchUsers = async () => {
+    try {
       setLoading(true);
-      apiClient
-        .put(`/admin/${selectedUser.id}`, selectedUser)
-        .then(() => {
-          const updatedUsers = users.map((user) =>
-            user.id === selectedUser.id ? selectedUser : user
-          );
-          setUsers(updatedUsers);
-          setOpenEditDialog(false);
-          setLoading(false);
-          setSnackbarMessage("User updated successfully.");
-          setSnackbarOpen(true);
-        })
-        .catch((error) => {
-          console.error("Error updating user:", error);
-          setLoading(false);
-          setSnackbarMessage("Error updating user.");
-          setSnackbarOpen(true);
-        });
+      const response = await apiClient.get("/admin");
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setSnackbarMessage("Error fetching users.");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteUser = (id) => {
-    setLoading(true);
-    apiClient
-      .delete(`/admin/${id}`)
-      .then(() => {
-        setUsers(users.filter((user) => user.id !== id));
-        setLoading(false);
-        setSnackbarMessage("User deleted successfully.");
-        setSnackbarOpen(true);
-      })
-      .catch((error) => {
-        console.error("Error deleting user:", error);
-        setLoading(false);
-        setSnackbarMessage("Error deleting user.");
-        setSnackbarOpen(true);
-      });
+  const handleCreateUser = async () => {
+    if (!newUser.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newUser.email)) {
+      setSnackbarMessage("Invalid email address.");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await apiClient.post("/admin", newUser);
+      setUsers([...users, response.data]);
+      setOpenCreateDialog(false);
+      setSnackbarMessage("User created successfully.");
+    } catch (error) {
+      console.error("Error creating user:", error);
+      setSnackbarMessage("Error creating user.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+    }
   };
 
-  const handleUpdateStatus = (id, status) => {
-    setLoading(true);
-    apiClient
-      .patch(`/admin/${id}/status`, { status })
-      .then(() => {
-        const updatedUsers = users.map((user) =>
-          user.id === id ? { ...user, status } : user
-        );
-        setUsers(updatedUsers);
-        setLoading(false);
-        setSnackbarMessage(
-          `User ${status === "active" ? "activated" : "suspended"}.`
-        );
-        setSnackbarOpen(true);
-      })
-      .catch((error) => {
-        console.error("Error updating user status:", error);
-        setLoading(false);
-        setSnackbarMessage("Error updating user status.");
-        setSnackbarOpen(true);
-      });
+  const handleUpdateUser = async () => {
+    if (
+      !selectedUser?.email ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(selectedUser.email)
+    ) {
+      setSnackbarMessage("Invalid email address.");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await apiClient.put(`/admin/${selectedUser.id}`, selectedUser);
+      setUsers((prev) =>
+        prev.map((user) => (user.id === selectedUser.id ? selectedUser : user))
+      );
+      setOpenEditDialog(false);
+      setSnackbarMessage("User updated successfully.");
+    } catch (error) {
+      console.error("Error updating user:", error);
+      setSnackbarMessage("Error updating user.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      setLoading(true);
+      await apiClient.delete(`/admin/${userId}`);
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
+      setSnackbarMessage("User deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      setSnackbarMessage("Error deleting user.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleUpdateStatus = async (userId, status) => {
+    try {
+      setLoading(true);
+      await apiClient.patch(`/admin/${userId}/status`, { status });
+      setUsers((prev) =>
+        prev.map((user) => (user.id === userId ? { ...user, status } : user))
+      );
+      setSnackbarMessage(`User status updated to ${status}.`);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      setSnackbarMessage("Error updating status.");
+    } finally {
+      setLoading(false);
+      setSnackbarOpen(true);
+    }
   };
 
   return (
@@ -186,6 +182,7 @@ const UsersPage = () => {
               <TableCell>Avatar</TableCell>
               <TableCell>Username</TableCell>
               <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
               <TableCell>Role</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
@@ -205,6 +202,7 @@ const UsersPage = () => {
                 </TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
                 <TableCell>{user.roleId === 1 ? "Admin" : "User"}</TableCell>
                 <TableCell>{user.status}</TableCell>
                 <TableCell>
@@ -268,19 +266,131 @@ const UsersPage = () => {
         onClose={() => setOpenCreateDialog(false)}
       >
         <DialogTitle>Thêm người dùng mới</DialogTitle>
-        <DialogContent>{/* Các trường nhập */}</DialogContent>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Username"
+            type="text"
+            fullWidth
+            value={newUser.username}
+            onChange={(e) =>
+              setNewUser({ ...newUser, username: e.target.value })
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Name"
+            type="text"
+            fullWidth
+            value={newUser.name}
+            onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            type="email"
+            fullWidth
+            value={newUser.email}
+            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            label="Password"
+            type="password"
+            fullWidth
+            value={newUser.password}
+            onChange={(e) =>
+              setNewUser({ ...newUser, password: e.target.value })
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Avatar"
+            type="text"
+            fullWidth
+            value={newUser.avatar}
+            onChange={(e) => setNewUser({ ...newUser, avatar: e.target.value })}
+          />
+          <Select
+            fullWidth
+            value={newUser.roleId}
+            onChange={(e) => setNewUser({ ...newUser, roleId: e.target.value })}
+            displayEmpty
+            sx={{ mt: 2 }}
+          >
+            <MenuItem value={0}>User</MenuItem>
+            <MenuItem value={1}>Admin</MenuItem>
+          </Select>
+        </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenCreateDialog(false)}>Hủy</Button>
-          <Button onClick={handleCreateUser}>Thêm</Button>
+          <Button onClick={() => setOpenCreateDialog(false)}>Cancel</Button>
+          <Button onClick={handleCreateUser} variant="contained">
+            Create
+          </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-        <DialogTitle>Chỉnh sửa thông tin</DialogTitle>
-        <DialogContent>{/* Các trường chỉnh sửa */}</DialogContent>
+        <DialogTitle>Chỉnh sửa người dùng</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Username"
+            type="text"
+            fullWidth
+            value={selectedUser?.username || ""}
+            onChange={(e) =>
+              setSelectedUser((prev) => ({ ...prev, username: e.target.value }))
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Name"
+            type="text"
+            fullWidth
+            value={selectedUser?.name || ""}
+            onChange={(e) =>
+              setSelectedUser((prev) => ({ ...prev, name: e.target.value }))
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            type="email"
+            fullWidth
+            value={selectedUser?.email || ""}
+            onChange={(e) =>
+              setSelectedUser((prev) => ({ ...prev, email: e.target.value }))
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Avatar"
+            type="text"
+            fullWidth
+            value={selectedUser?.avatar || ""}
+            onChange={(e) =>
+              setSelectedUser((prev) => ({ ...prev, avatar: e.target.value }))
+            }
+          />
+          <Select
+            fullWidth
+            value={selectedUser?.roleId || 0}
+            onChange={(e) =>
+              setSelectedUser((prev) => ({ ...prev, roleId: e.target.value }))
+            }
+            displayEmpty
+            sx={{ mt: 2 }}
+          >
+            <MenuItem value={0}>User</MenuItem>
+            <MenuItem value={1}>Admin</MenuItem>
+          </Select>
+        </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenEditDialog(false)}>Hủy</Button>
-          <Button onClick={handleUpdateUser}>Cập nhật</Button>
+          <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
+          <Button onClick={handleUpdateUser} variant="contained">
+            Update
+          </Button>
         </DialogActions>
       </Dialog>
 

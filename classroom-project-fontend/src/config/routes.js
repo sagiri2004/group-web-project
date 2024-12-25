@@ -14,6 +14,7 @@ const routes = {
   messenger: "/messenger/:receiverId",
   about: "/about",
   admin: "/admin",
+  resetPassword: "/reset-password/:token",
 };
 
 export default routes;

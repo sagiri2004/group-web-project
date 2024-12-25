@@ -25,6 +25,7 @@ import { registerUser } from "~/redux/authSlice";
 
 function SignUpForm({ handleToggle }) {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""); // Thêm email
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -53,11 +54,12 @@ function SignUpForm({ handleToggle }) {
     event.preventDefault();
     const user = {
       username: username,
+      email: email, // Thêm email vào payload
       password: password,
     };
 
-    // Kiểm tra xem username và password có rỗng không
-    if (!username || !password || !confirmPassword) {
+    // Kiểm tra xem các trường có rỗng không
+    if (!username || !email || !password || !confirmPassword) {
       setSnackbar({
         open: true,
         message: "Please fill in all fields",
@@ -66,11 +68,12 @@ function SignUpForm({ handleToggle }) {
       return;
     }
 
-    // kiem tra da tick vao checkbox dieu khoan chua
-    if (!document.querySelector('input[type="checkbox"]').checked) {
+    // Kiểm tra định dạng email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
       setSnackbar({
         open: true,
-        message: "Please agree to the Terms and Conditions",
+        message: "Invalid email format",
         type: "error",
       });
       return;
@@ -86,9 +89,19 @@ function SignUpForm({ handleToggle }) {
       return;
     }
 
+    // Kiểm tra đã tick vào checkbox điều khoản chưa
+    if (!document.querySelector('input[type="checkbox"]').checked) {
+      setSnackbar({
+        open: true,
+        message: "Please agree to the Terms and Conditions",
+        type: "error",
+      });
+      return;
+    }
+
     try {
-      setIsLoading(true); // Start the loading indicator
-      const result = await dispatch(registerUser(user)); // Gọi dispatch trực tiếp ở đây
+      setIsLoading(true);
+      const result = await dispatch(registerUser(user));
 
       if (result) {
         if (result.payload.success) {
@@ -104,21 +117,18 @@ function SignUpForm({ handleToggle }) {
             type: "error",
           });
         }
-        // window.location.href = "/login";
       }
 
       console.log("Register result:", result);
-
-      setIsLoading(false); // Stop the loading indicator
+      setIsLoading(false);
     } catch (error) {
       setSnackbar({
         open: true,
         message: error.message || "An unexpected error occurred",
         type: "error",
       });
-      console.log("Register error:", error.message ? error.message : error);
-
-      setIsLoading(false); // Stop the loading indicator
+      console.error("Register error:", error.message || error);
+      setIsLoading(false);
     }
   };
 
@@ -161,14 +171,26 @@ function SignUpForm({ handleToggle }) {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             sx={{
-              "& .MuiInputLabel-root": {
-                color: "white",
-              },
+              "& .MuiInputLabel-root": { color: "white" },
               "& .MuiOutlinedInput-root": {
                 color: "white",
-                "& fieldset": {
-                  borderColor: "white",
-                },
+                "& fieldset": { borderColor: "white" },
+              },
+            }}
+          />
+        </FormControl>
+        <FormControl sx={{ width: "100%" }} variant="outlined">
+          <TextField
+            id="outlined-basic-email"
+            label="Email"
+            variant="outlined"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            sx={{
+              "& .MuiInputLabel-root": { color: "white" },
+              "& .MuiOutlinedInput-root": {
+                color: "white",
+                "& fieldset": { borderColor: "white" },
               },
             }}
           />
@@ -202,9 +224,7 @@ function SignUpForm({ handleToggle }) {
             sx={{
               "& .MuiOutlinedInput-root": {
                 color: "white",
-                "& fieldset": {
-                  borderColor: "white",
-                },
+                "& fieldset": { borderColor: "white" },
               },
             }}
           />
@@ -238,9 +258,7 @@ function SignUpForm({ handleToggle }) {
             sx={{
               "& .MuiOutlinedInput-root": {
                 color: "white",
-                "& fieldset": {
-                  borderColor: "white",
-                },
+                "& fieldset": { borderColor: "white" },
               },
             }}
           />
@@ -279,7 +297,6 @@ function SignUpForm({ handleToggle }) {
         </Button>
       </Box>
 
-      {/* Snackbar notification */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
