@@ -98,6 +98,29 @@ router.get(
   ClassroomController.getClassroom
 );
 
+// lay ra so luong like cua post
+router.get(
+  "/get-like/:postId",
+  authenticateToken,
+  ClassroomController.getLikesPost
+);
+
+// like post
+router.post("/like-post", authenticateToken, ClassroomController.likePost);
+
+// unlike post
+router.post("/unlike-post", authenticateToken, ClassroomController.unlikePost);
+
+// lay ra tat ca cac comment cua post
+router.get(
+  "/list-comment/:postId",
+  authenticateToken,
+  ClassroomController.listComment
+);
+
+// them comment vao post
+router.post("/add-comment", authenticateToken, ClassroomController.addComment);
+
 // get all classroom co lien quan den user
 router.get("/", authenticateToken, ClassroomController.getAllClassroom);
 

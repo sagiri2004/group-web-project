@@ -298,50 +298,41 @@ async function listAssignment(user, classroomId) {
   // Lấy ra tất cả assignments của lớp học
   const assignments = await db.Assignment.findAll({
     where: { classId: classroomId },
-    include: [
-      {
-        model: db.UserAssignment,
-        where: { userId: user.id }, // Lọc những assignment đã nộp của user
-        required: false, // Cho phép lấy assignments chưa nộp
-      },
-    ],
   });
 
   // Lấy ngày hiện tại để so sánh hạn chót
   const currentDate = new Date();
 
-  // Xử lý dữ liệu assignments để thêm thông tin về trạng thái nộp bài
-  const result = assignments.map((assignment) => {
-    // Kiểm tra xem assignment có tồn tại trong UserAssignment hay không (nghĩa là user đã nộp hay chưa)
-    const userAssignment = assignment.UserAssignments
-      ? assignment.UserAssignments[0]
-      : null;
+  // lay ra so luon bai user da nop
+  const userAssignments = await db.UserAssignment.findAll({
+    where: {
+      userId: user.id,
+    },
+  });
 
-    // Kiểm tra xem bài đã nộp đúng hạn chưa
-    const isSubmittedOnTime = userAssignment
-      ? new Date(userAssignment.updatedAt) <= new Date(assignment.dueDate)
-      : false;
+  const data = assignments.map((item) => {
+    const { id, title, description, dueDate } = item;
+
+    // Kiểm tra xem user đã nộp bài chưa
+    const userAssignment = userAssignments.find(
+      (assignment) => assignment.assignmentId === id
+    );
 
     return {
-      id: assignment.id,
-      title: assignment.title,
-      description: assignment.description,
-      dueDate: assignment.dueDate,
-      // Nếu đã nộp bài
-      isSubmitted: userAssignment !== null,
-      isOnTime: isSubmittedOnTime,
-      // Số ngày còn lại cho đến khi hết hạn (nếu chưa hết hạn)
-      daysLeft:
-        currentDate < new Date(assignment.dueDate)
-          ? Math.ceil(
-              (new Date(assignment.dueDate) - currentDate) / (1000 * 3600 * 24)
-            )
-          : 0,
+      id,
+      title,
+      description,
+      dueDate,
+      isSubmitted: !!userAssignment,
+      isOnTime: userAssignment
+        ? new Date(userAssignment.updatedAt) <= new Date(dueDate)
+        : false,
+      daysLeft: Math.floor((new Date(dueDate) - currentDate) / 86400000),
     };
   });
 
   return {
-    data: result,
+    data,
     message: "List assignment successfully",
   };
 }
@@ -524,12 +515,29 @@ async function createPost(user, classroomId, title, content) {
     throw new Error("User not in classroom");
   }
 
-  const post = await db.Post.create({
+  let post = await db.Post.create({
     classroomId,
     userId: user.id,
     title,
     content,
   });
+
+  // them truong user de lay ra thong tin cua nguoi tao bai viet
+  const userPost = await db.User.findByPk(user.id);
+  post = {
+    id: post.id,
+    title: post.title,
+    content: post.content,
+    createdAt: post.createdAt,
+    likes: 0,
+    comments: 0,
+    isLiked: false,
+    id: userPost.id,
+    username: userPost.username,
+    name: userPost.name,
+    avatar: userPost.avatar,
+    time: formatRelativeTime(post.createdAt),
+  };
 
   return {
     data: { post },
@@ -542,49 +550,75 @@ async function listPost(user, classroomId) {
     where: {
       classroomId,
     },
-    include: db.User,
+    include: {
+      model: db.User,
+      attributes: ["id", "username", "name", "avatar"],
+    },
   });
 
-  const data1 = posts.map((item) => {
-    const { id, title, content, createdAt, User } = item;
-    return {
-      id,
-      title,
-      content,
-      createdAt,
-      User: {
-        id: User.id,
-        username: User.username,
-        name: User.name,
-        avatar: User.avatar,
-      },
-    };
-  });
+  // Lấy thêm số lượt thích, số bình luận và trạng thái like của người dùng
+  const dataWithCounts = await Promise.all(
+    posts.map(async (item) => {
+      const { id, title, content, createdAt, User } = item;
 
-  // chuyen ve dang
-  //   <PostDisplayComponent
-  //   title="Check out this amazing view!"
-  //   content="<p>This place is so beautiful. Highly recommend visiting!</p>"
-  //   avatar="https://via.placeholder.com/150"
-  //   name="John Doe"
-  //   username="johndoe"
-  //   time="2h"
-  // />
+      // Đếm số lượt thích
+      const likesCount = await db.UserPost.count({
+        where: { postId: id },
+      });
 
-  const data = data1.map((item) => {
-    const { id, title, content, createdAt, User } = item;
+      // Đếm số bình luận
+      const commentsCount = await db.Comment.count({
+        where: { postId: id },
+      });
+
+      // Kiểm tra xem người dùng đã like bài viết chưa
+      const isLiked = await db.UserPost.findOne({
+        where: {
+          userId: user.id,
+          postId: id,
+        },
+      });
+
+      return {
+        id,
+        title,
+        content,
+        createdAt,
+        likes: likesCount,
+        comments: commentsCount,
+        isLiked: !!isLiked, // Kiểm tra nếu người dùng đã like bài viết
+        User: {
+          id: User.id,
+          username: User.username,
+          name: User.name,
+          avatar: User.avatar,
+        },
+      };
+    })
+  );
+
+  // Chuyển về dạng cần hiển thị
+  const data = dataWithCounts.map((item) => {
+    const { id, title, content, createdAt, likes, comments, isLiked, User } =
+      item;
     const time = formatRelativeTime(createdAt); // Thời gian tương đối
     return {
       id,
       title,
       content,
       createdAt,
+      likes,
+      comments,
+      isLiked, // Trả về trường isLiked để kiểm tra trạng thái like
       username: User.username,
       name: User.name,
       avatar: User.avatar,
       time, // Thời gian đã format
     };
   });
+
+  // sap xep theo thoi gian tao bai viet moi nhat
+  data.sort((a, b) => b.createdAt - a.createdAt);
 
   return {
     data,
@@ -681,6 +715,172 @@ async function getAllClassroom(user) {
   };
 }
 
+// lay ra so luong like cua post
+// Get the number of likes for a post
+async function getLikesPost(user, postId) {
+  const post = await db.Post.findByPk(postId);
+
+  if (!post) {
+    return {
+      message: "Post not found",
+      status: 404,
+    };
+  }
+
+  const likes = await db.UserPost.count({
+    where: { postId },
+  });
+
+  return {
+    data: { likes },
+    message: "Get like post successfully",
+    status: 200,
+  };
+}
+
+// Like a post
+async function likePost(user, postId) {
+  const post = await db.Post.findByPk(postId);
+
+  if (!post) {
+    return {
+      message: "Post not found",
+      status: 404,
+    };
+  }
+
+  const existingLike = await db.UserPost.findOne({
+    where: {
+      userId: user.id,
+      postId,
+    },
+  });
+
+  if (existingLike) {
+    return {
+      message: "You have already liked this post",
+      status: 400,
+    };
+  }
+
+  await db.UserPost.create({
+    userId: user.id,
+    postId,
+    likes: 1,
+  });
+
+  return {
+    message: "Like post successfully",
+    status: 200,
+  };
+}
+
+// Unlike a post
+async function unlikePost(user, postId) {
+  const post = await db.Post.findByPk(postId);
+
+  if (!post) {
+    return {
+      message: "Post not found",
+      status: 404,
+    };
+  }
+
+  const like = await db.UserPost.findOne({
+    where: {
+      userId: user.id,
+      postId,
+    },
+  });
+
+  if (!like) {
+    return {
+      message: "You have not liked this post",
+      status: 400,
+    };
+  }
+
+  await like.destroy();
+
+  return {
+    message: "Unlike post successfully",
+    status: 200,
+  };
+}
+
+// Get list of comments for a post
+async function listComment(user, postId) {
+  const post = await db.Post.findByPk(postId);
+
+  if (!post) {
+    return {
+      message: "Post not found",
+      status: 404,
+    };
+  }
+
+  const comments = await db.Comment.findAll({
+    where: { postId },
+    include: db.User,
+  });
+
+  const data = comments.map((item) => {
+    const { id, content, createdAt, User } = item;
+    return {
+      id,
+      content,
+      createdAt,
+      User: {
+        id: User.id,
+        username: User.username,
+        name: User.name,
+        avatar: User.avatar,
+      },
+    };
+  });
+
+  return {
+    data,
+    message: "List comment successfully",
+    status: 200,
+  };
+}
+
+// add comment
+async function addComment(user, postId, content) {
+  const post = await db.Post.findByPk(postId);
+
+  if (!post) {
+    return {
+      message: "Post not found",
+      status: 404,
+    };
+  }
+
+  const comment = await db.Comment.create({
+    userId: user.id,
+    postId,
+    content,
+  });
+
+  const userComment = await db.User.findByPk(user.id);
+
+  return {
+    comment: {
+      content: comment.content,
+      id: comment.id,
+      User: {
+        id: userComment.id,
+        username: userComment.username,
+        name: userComment.name,
+        avatar: userComment.avatar,
+      },
+    },
+    message: "Add comment successfully",
+    status: 200,
+  };
+}
+
 module.exports = {
   joinClassroom,
   leaveClassroom,
@@ -701,4 +901,10 @@ module.exports = {
   checkIsAdmin,
   getClassroom,
   getAllClassroom,
+  likePost,
+  getLikesPost,
+  likePost,
+  unlikePost,
+  listComment,
+  addComment,
 };

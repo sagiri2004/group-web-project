@@ -331,6 +331,93 @@ class ClassroomController {
       });
     }
   }
+
+  // lay ra so luong like cua post
+  async getLikesPost(req, res) {
+    const user = req.user;
+    const { postId } = req.params;
+
+    try {
+      const result = await classroomService.getLikesPost(user, postId);
+
+      res.json(result);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  }
+
+  // like post
+  async likePost(req, res) {
+    const user = req.user;
+    const { postId } = req.body;
+
+    console.log("like post", user, postId);
+
+    try {
+      const result = await classroomService.likePost(user, postId);
+
+      res.json(result);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  }
+
+  // unlike post
+  async unlikePost(req, res) {
+    const user = req.user;
+    const { postId } = req.body;
+
+    try {
+      const result = await classroomService.unlikePost(user, postId);
+
+      res.json(result);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  }
+
+  // list comment cua post
+  async listComment(req, res) {
+    const user = req.user;
+    const { postId } = req.params;
+
+    try {
+      const result = await classroomService.listComment(user, postId);
+
+      res.json(result);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  }
+
+  // add comment
+  async addComment(req, res) {
+    const user = req.user;
+    const { postId, content } = req.body;
+
+    try {
+      const result = await classroomService.addComment(user, postId, content);
+
+      res.json(result);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        message: "Internal server error",
+      });
+    }
+  }
 }
 
 module.exports = new ClassroomController();

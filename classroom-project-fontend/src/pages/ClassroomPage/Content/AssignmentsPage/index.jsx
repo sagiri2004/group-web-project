@@ -17,6 +17,8 @@ function AssignmentsPage() {
   const dialogRef = useRef(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  console.log("assignments:", assignments);
+
   useEffect(() => {
     if (location.pathname.includes("assignments")) {
       setCurrentPath("assignments");

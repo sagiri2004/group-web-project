@@ -1,95 +1,65 @@
-import { useState, useRef, useEffect, useContext } from "react";
-import { Box, CircularProgress, Button } from "@mui/material";
-import Footer from "../Footer";
+import { useState, useRef, useEffect } from "react";
+import { Box, Button, Skeleton, Snackbar, Alert } from "@mui/material";
 import PostDisplayComponent from "./PostDisplayComponent";
+import PostComponent from "./PostComponent";
 import apiClient from "~/api/apiClient";
 import { useParams } from "react-router-dom";
-
-// const initialPosts = [
-//   {
-//     title: "Post 1",
-//     value: "This is the content of post 1",
-//     avatar: "https://material-ui.com/static/images/avatar/1.jpg",
-//     name: "User 1",
-//   },
-//   {
-//     title: "Post 2",
-//     value: "This is the content of post 2",
-//     avatar: "https://material-ui.com/static/images/avatar/2.jpg",
-//     name: "User 2",
-//   },
-//   {
-//     title: "Post 3",
-//     value: "This is the content of post 3",
-//     avatar: "https://material-ui.com/static/images/avatar/3.jpg",
-//     name: "User 3",
-//   },
-//   {
-//     title: "Post 4",
-//     value: "This is the content of post 4",
-//     avatar: "https://material-ui.com/static/images/avatar/4.jpg",
-//     name: "User 4",
-//   },
-// ];
+import { useSelector } from "react-redux";
 
 function HomePage() {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef(null);
-  const handleScroll = () => {
-    // if (containerRef.current.scrollTop === 0 && !isLoading) {
-    //   setIsLoading(true);
-    //   setTimeout(() => {
-    //     const newPosts = [
-    //       {
-    //         title: `Post ${posts.length + 1}`,
-    //         value: `This is the content of post ${posts.length + 1}`,
-    //         avatar: `https://material-ui.com/static/images/avatar/${
-    //           (posts.length % 4) + 1
-    //         }.jpg`,
-    //         name: `User ${posts.length + 1}`,
-    //       },
-    //       {
-    //         title: `Post ${posts.length + 2}`,
-    //         value: `This is the content of post ${posts.length + 2}`,
-    //         avatar: `https://material-ui.com/static/images/avatar/${
-    //           ((posts.length + 1) % 4) + 1
-    //         }.jpg`,
-    //         name: `User ${posts.length + 2}`,
-    //       },
-    //     ];
-    //     setPosts((prevPosts) => [...prevPosts, ...newPosts]); // Thêm bài viết mới
-    //     setIsLoading(false); // Tắt loading
-    //   }, 2000);
-    // }
-  };
+  const [isPostComponentOpen, setIsPostComponentOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+  });
 
-  // lay ra id cua lop hoc
   const { classroomId } = useParams();
+  const userId = useSelector((state) => state.auth.login.currentUser.id);
+
+  const handleCreatePost = () => {
+    setIsPostComponentOpen(true);
+    containerRef.current.scrollTo({
+      top: containerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
+        setIsLoading(true);
         const response = await apiClient.get(
-          "/classroom/list-post/" + classroomId
+          `/classroom/list-post/${classroomId}`
         );
         setPosts(response.data.data);
       } catch (error) {
         console.error("Failed to fetch posts: ", error);
+        setSnackbar({
+          open: true,
+          message: "Failed to load posts.",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchPosts();
-  }, []);
+  }, [classroomId]);
 
-  // Cuộn xuống cuối container
-  const scrollToBottom = () => {
+  useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTo({
         top: containerRef.current.scrollHeight,
-        behavior: "smooth", // Hiệu ứng cuộn mượt
+        behavior: "smooth",
       });
     }
+  }, [posts]);
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -102,7 +72,6 @@ function HomePage() {
     >
       <Box
         ref={containerRef}
-        onScroll={handleScroll}
         sx={{
           height: "100%",
           display: "flex",
@@ -110,6 +79,7 @@ function HomePage() {
           justifyContent: "space-between",
           mt: -2,
           overflow: "auto",
+          scrollBehavior: "smooth",
 
           "&::-webkit-scrollbar": {
             width: "8px",
@@ -124,21 +94,6 @@ function HomePage() {
           },
         }}
       >
-        {/* Loading Indicator */}
-        {isLoading && (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "40px",
-              backgroundColor: "#f5f5f5",
-            }}
-          >
-            <CircularProgress size={24} />
-          </Box>
-        )}
-
         <Box
           sx={{
             width: "60%",
@@ -148,31 +103,63 @@ function HomePage() {
             gap: 2,
           }}
         >
-          {/* Hiển thị danh sách bài viết */}
-          {posts.slice().map((post, index) => (
-            <PostDisplayComponent
-              posts={posts}
-              setPosts={setPosts}
-              key={index}
-              {...post}
-            />
-          ))}
+          {isLoading
+            ? Array.from(new Array(3)).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  variant="rectangular"
+                  width="100%"
+                  height={160}
+                  sx={{ borderRadius: 2 }}
+                />
+              ))
+            : posts.map((post, index) => (
+                <PostDisplayComponent
+                  posts={posts}
+                  key={index}
+                  {...post}
+                  userId={userId}
+                />
+              ))}
         </Box>
-        {/* Nút Scroll to Bottom */}
         <Box
           sx={{
-            position: "fixed",
-            bottom: 16,
-            right: 16,
-            zIndex: 1000,
+            display: "flex",
+            padding: 2,
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
           }}
         >
-          <Button variant="contained" color="primary" onClick={scrollToBottom}>
-            Scroll to Bottom
-          </Button>
+          {!isPostComponentOpen && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCreatePost}
+            >
+              Create Post
+            </Button>
+          )}
+          {isPostComponentOpen && (
+            <PostComponent
+              posts={posts}
+              setPosts={setPosts}
+              onClose={() => setIsPostComponentOpen(false)}
+              setSnackbar={setSnackbar} // Pass setSnackbar to PostComponent
+            />
+          )}
         </Box>
-
-        <Footer posts={posts} setPost={setPosts} />
+      </Box>
+      <Box sx={{ position: "fixed", bottom: 0, right: 0, p: 2 }}>
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+        >
+          <Alert severity="success" onClose={handleCloseSnackbar}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </Box>
   );
