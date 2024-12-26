@@ -60,8 +60,54 @@ async function updateUser(userId, user) {
   }
 }
 
+async function getUserById(userId) {
+  try {
+    const user = await db.User.findByPk(userId, {
+      attributes: ["id", "username", "name", "avatar", "email"],
+    });
+
+    // lay ra nhung classroom ma user da tao tu trong userClassroom voi isAdmin = true
+    const classrooms = await db.UserClassroom.findAll({
+      where: {
+        userId,
+        isAdmin: true,
+      },
+      include: {
+        model: db.Classroom,
+        attributes: ["id", "name", "description"],
+      },
+    });
+
+    // lay ra nhung flashcardSet ma user da tao tu trong flashcardSetUser voi isCreator = true
+    const flashcardSets = await db.FlashcardSetUser.findAll({
+      where: {
+        userId,
+        isCreator: true,
+      },
+      include: {
+        model: db.FlashcardSet,
+        as: "flashcardSet", // Thêm alias
+        attributes: ["id", "title", "description"],
+      },
+    });
+
+    return {
+      message: "User found",
+      data: {
+        user,
+        classrooms,
+        flashcardSets,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 module.exports = {
   getMe,
   findUserByName,
   updateUser,
+  getUserById,
 };
