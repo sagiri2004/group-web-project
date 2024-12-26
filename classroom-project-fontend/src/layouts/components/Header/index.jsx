@@ -19,7 +19,6 @@ import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import LogoIcon from "~/assets/images/logo.svg?react";
 import ContrastIcon from "@mui/icons-material/Contrast";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 import { useColorScheme } from "@mui/material/styles";
 import { Link, useNavigate } from "react-router-dom";
@@ -280,9 +279,6 @@ function Header() {
               <NotificationsIcon />
             </Badge>
           </IconButton> */}
-          <IconButton size="large" color="inherit">
-            <AddCircleIcon />
-          </IconButton>
           <IconButton
             size="large"
             edge="end"

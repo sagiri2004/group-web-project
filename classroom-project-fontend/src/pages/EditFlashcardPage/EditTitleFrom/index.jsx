@@ -3,6 +3,7 @@ import { debounce } from "lodash";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import DoneIcon from "@mui/icons-material/Done";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -16,6 +17,7 @@ function EditTitleForm({ title: firstTitle, description: firstDescription }) {
   const initialTitle = useRef(firstTitle);
   const initialDescription = useRef(firstDescription);
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setTitle(firstTitle);
@@ -34,7 +36,7 @@ function EditTitleForm({ title: firstTitle, description: firstDescription }) {
       ) {
         // dispatch(updateFlashcardSet({ title, description })); // se dung sau
       }
-    }, 5000),
+    }, 500),
     [dispatch]
   );
 
@@ -69,6 +71,9 @@ function EditTitleForm({ title: firstTitle, description: firstDescription }) {
           startIcon={<ArrowBackIcon />}
           sx={{
             textTransform: "none",
+          }}
+          onClick={() => {
+            navigate(`/flashcards/${id}`);
           }}
         >
           Back to set

@@ -25,6 +25,8 @@ import socket from "~/api/socketConfig";
 import apiClient from "~/api/apiClient";
 import { calculateTimeSince } from "~/utils/timeUtils";
 
+import SearchContacts from "./SearchContacts";
+
 const ChatContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   backgroundColor: "#f0f2f5",
@@ -236,45 +238,12 @@ const ChatApp = () => {
   return (
     <ChatContainer>
       <ContactsSection>
-        <Box p={2}>
-          <TextField
-            fullWidth
-            placeholder="Search contacts"
-            variant="outlined"
-            size="small"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onClick={(e) => {
-              if (searchContacts.length > 0 || !searchQuery.trim()) {
-                handleMenuOpen(e);
-              }
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FiSearch />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Menu
-            anchorEl={menuAnchorEl}
-            open={Boolean(menuAnchorEl)}
-            onClose={handleMenuClose}
-          >
-            {searchContacts.map((contact) => (
-              <MenuItem
-                key={contact.id}
-                onClick={() => handleSearchSelect(contact)}
-              >
-                <ListItemAvatar>
-                  <Avatar src={contact.avatar} alt={contact.name} />
-                </ListItemAvatar>
-                <ListItemText primary={contact.name} />
-              </MenuItem>
-            ))}
-          </Menu>
-        </Box>
+        <SearchContacts
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchContacts={searchContacts}
+          handleSearchSelect={handleSearchSelect}
+        />
         <List>
           {contacts.map((contact) => (
             <ListItem

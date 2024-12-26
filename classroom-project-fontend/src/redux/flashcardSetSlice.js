@@ -127,7 +127,10 @@ const flashcardSetSlice = createSlice({
       .addCase(deleteFlashcard.fulfilled, (state, action) => {
         state.loading = false;
 
-        const flashcardId = action.payload.id || action.payload.data.id;
+        const flashcardId =
+          action.payload.id || action.payload.data.flashcardId;
+
+        console.log("flashcardId", flashcardId);
 
         // Loại bỏ flashcard khỏi mảng state.data.flashcards
         state.data.flashcards = state.data.flashcards.filter(

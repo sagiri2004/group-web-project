@@ -4,7 +4,6 @@ import {
   Typography,
   Paper,
   Avatar,
-  Stack,
   Grid,
   Card,
   CardContent,
@@ -13,11 +12,11 @@ import {
   Button,
   Skeleton,
 } from "@mui/material";
-import WbSunnyIcon from "@mui/icons-material/WbSunny";
-import CloudIcon from "@mui/icons-material/Cloud";
-import AcUnitIcon from "@mui/icons-material/AcUnit";
+
 import apiClient from "~/api/apiClient";
 import { useNavigate } from "react-router-dom";
+
+import WeatherCard from "./WeatherCard";
 
 function HomePage() {
   const [userData, setUserData] = useState(null);
@@ -25,7 +24,6 @@ function HomePage() {
   const [flashcardsData, setFlashcardsData] = useState([]);
   const [classroomsData, setClassroomsData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentTime, setCurrentTime] = useState("");
   const navigate = useNavigate();
 
   const handleNavigationFlashcard = (id) => {
@@ -82,6 +80,10 @@ function HomePage() {
         setWeatherData({
           temp: data.main.temp,
           condition: data.weather[0].main,
+          feels_like: data.main.feels_like,
+          humidity: data.main.humidity,
+          wind_speed: data.wind.speed,
+          name: data.name,
         });
       } catch (error) {
         console.error("Error fetching weather:", error);
@@ -91,12 +93,6 @@ function HomePage() {
     };
 
     fetchWeather();
-
-    const interval = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString());
-    }, 1000);
-
-    return () => clearInterval(interval);
   }, []);
 
   if (loading || !userData) {
@@ -132,8 +128,8 @@ function HomePage() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1, padding: 3 }}>
-      <Grid container spacing={2}>
+    <Box sx={{ flexGrow: 1, padding: 3, height: "100%" }}>
+      <Grid container spacing={2} height="100%">
         {/* Left Column - User Info and Weather */}
         <Grid item xs={12} md={4}>
           <Paper
@@ -153,41 +149,10 @@ function HomePage() {
             <Typography variant="h5" fontWeight="bold" mt={2}>
               Hello, {userData.name}!
             </Typography>
-            <Typography variant="subtitle1">{userData.username}</Typography>
+            <Typography variant="subtitle1">@{userData.username}</Typography>
           </Paper>
 
-          <Paper
-            elevation={3}
-            sx={{ padding: 3, textAlign: "center", borderRadius: 2 }}
-          >
-            {weatherData ? (
-              <>
-                {weatherData.condition === "Clear" ? (
-                  <WbSunnyIcon fontSize="large" color="warning" />
-                ) : weatherData.condition === "Clouds" ? (
-                  <CloudIcon fontSize="large" color="action" />
-                ) : (
-                  <AcUnitIcon fontSize="large" color="primary" />
-                )}
-                <Typography variant="h6" mt={1}>
-                  {weatherData.temp}°C
-                </Typography>
-                <Typography variant="body1">{weatherData.condition}</Typography>
-              </>
-            ) : (
-              <>
-                <Skeleton variant="circle" width={40} height={40} />
-                <Skeleton width="80%" />
-                <Skeleton width="60%" />
-              </>
-            )}
-            <Box mt={2}>
-              <Typography variant="h6">Current Time</Typography>
-              <Typography variant="h5" fontWeight="bold">
-                {currentTime || <Skeleton width="60%" />}
-              </Typography>
-            </Box>
-          </Paper>
+          <WeatherCard weatherData={weatherData} />
         </Grid>
 
         {/* Right Column - Classrooms and Flashcards */}
@@ -237,6 +202,7 @@ function HomePage() {
                     key={classroom.id}
                     sx={{
                       minWidth: "300px",
+                      maxWidth: "300px",
                       flex: "0 0 auto",
                     }}
                     onClick={() => handleNavigationClassroom(classroom.id)}

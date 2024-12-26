@@ -180,6 +180,9 @@ async function createFlashcardSet(rawFlashcardSetData, user) {
     message: "Create flashcard set successfully",
     data: {
       flashcardSetID: flashcardSet.id,
+      id: flashcardSet.id,
+      title: flashcardSet.title,
+      description: flashcardSet.description,
     },
   };
 }

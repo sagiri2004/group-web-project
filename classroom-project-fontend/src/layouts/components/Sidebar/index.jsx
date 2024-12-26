@@ -66,7 +66,7 @@ function Sidebar() {
           const { data } = await apiClient.get("/messages");
           const conversationId = data[0].id;
           console.log("conversationId", conversationId);
-          navigate(`/messages/${conversationId}`);
+          // navigate(`/messages/${conversationId}`);
         } else {
           navigate(nav.route);
         }

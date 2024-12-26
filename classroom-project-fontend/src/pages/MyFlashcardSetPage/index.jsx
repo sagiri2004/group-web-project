@@ -31,7 +31,8 @@ function MyFlashcardSetPage() {
       .post(`/flashcard/create`, newFlashcardSet)
       .then((response) => {
         const createdSet = response.data.data;
-        setFlashcardSets((prev) => [...prev, createdSet]);
+        console.log("Created flashcard set:", createdSet);
+        setFlashcardSets((prev) => [createdSet, ...prev]);
         handleClose();
       })
       .catch((error) => {
