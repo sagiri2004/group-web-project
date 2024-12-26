@@ -9,4 +9,7 @@ router.post("/find", authenticateToken, userController.findUserByName);
 // update user
 router.put("/", authenticateToken, userController.updateUser);
 
+// get user by id
+router.get("/:id", authenticateToken, userController.getUserById);
+
 module.exports = router;
