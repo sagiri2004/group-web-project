@@ -158,7 +158,10 @@ function HomePage() {
         {/* Right Column - Classrooms and Flashcards */}
         <Grid item xs={12} md={8}>
           {/* Classrooms Section */}
-          <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 }}>
+          <Paper
+            elevation={3}
+            sx={{ padding: 2, marginBottom: 2, width: "1024px" }}
+          >
             <Typography variant="h6" fontWeight="bold" gutterBottom>
               Classrooms
             </Typography>

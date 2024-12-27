@@ -25,17 +25,68 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "~/redux/authSlice";
 
+import SearchComponent from "./SearchComponent";
+import ClassroomDialog from "./ClassroomDialog";
+import UserDialog from "./UserDialog";
+import apiClient from "~/api/apiClient";
+
+import { useEffect } from "react";
+
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 function Header() {
   const user = useSelector((state) => state.auth.login.currentUser);
   const [anchorEl, setAnchorEl] = useState(null);
   const [subAnchorEl, setSubAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
   const isSubMenuOpen = Boolean(subAnchorEl);
-
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedClassroom, setSelectedClassroom] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { mode, setMode } = useColorScheme();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchData, setSearchData] = useState([]);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      apiClient
+        .get(`/search?q=${debouncedSearchQuery}`)
+        .then((response) => {
+          setSearchData(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  }, [debouncedSearchQuery]);
+
+  const handleSearchSelect = (data) => {
+    if (data.type === "Flashcard") {
+      navigate(`/flashcards/${data.id}`);
+    } else if (data.type === "Classroom") {
+      setSelectedClassroom(data); // Open classroom dialog
+    } else if (data.type === "User") {
+      setSelectedUser(data); // Open user dialog
+    }
+  };
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -251,6 +302,13 @@ function Header() {
         </Typography>
       </Box>
 
+      <SearchComponent
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchData={searchData}
+        handleSearchSelect={handleSearchSelect}
+      />
+
       {user ? (
         <Box
           sx={{
@@ -261,24 +319,6 @@ function Header() {
             padding: 1,
           }}
         >
-          {/* <IconButton
-            size="large"
-            aria-label="show 4 new mails"
-            color="inherit"
-          >
-            <Badge badgeContent={4} color="error">
-              <MailIcon />
-            </Badge>
-          </IconButton>
-          <IconButton
-            size="large"
-            aria-label="show 17 new notifications"
-            color="inherit"
-          >
-            <Badge badgeContent={17} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton> */}
           <IconButton
             size="large"
             edge="end"
@@ -328,8 +368,19 @@ function Header() {
           {renderSubMenu}
         </Box>
       )}
-      {/* {renderAddFlashcardForm}
-      {renderAddFolderForm} */}
+      {/* User Dialog */}
+      <UserDialog
+        open={!!selectedUser}
+        user={selectedUser}
+        onClose={() => setSelectedUser(null)}
+      />
+
+      {/* Classroom Dialog */}
+      <ClassroomDialog
+        open={!!selectedClassroom}
+        classroom={selectedClassroom}
+        onClose={() => setSelectedClassroom(null)}
+      />
     </Box>
   );
 }
